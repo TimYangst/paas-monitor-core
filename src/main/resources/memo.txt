@@ -1,0 +1,9 @@
+Prototype Mapping
+
+1 Phym (hypervisor) 
+2 Vim (OS)
+3 OS Service (Network, FileSystem)
+4 OS Service Component
+5 Application Server
+6 Application Server Component
+7 Application Instance
