@@ -6,4 +6,7 @@ import org.seforge.monitor.domain.Resource;
 
 public interface ResourceManager {
 	List<Resource> getAllVims();
+	
+	List<Resource> getAllPhyms();
+	
 }

@@ -15,5 +15,10 @@ public class ResourceManagerImpl implements ResourceManager{
 	public List<Resource> getAllVims() {
 		return Resource.findResourcesByTypeIdEquals(ResourceType.OPERATING_SYSTEM).getResultList();		
 	}
+	
+	@Transactional
+	public List<Resource> getAllPhyms() {
+		return Resource.findResourcesByTypeIdEquals(ResourceType.PHYSICAL_MACHINE).getResultList();		
+	}
 
 }

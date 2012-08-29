@@ -1,20 +1,16 @@
 package org.seforge.monitor.domain;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.JoinColumn;
-
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.json.RooJson;
@@ -32,8 +28,9 @@ public class Resource {
 
 	private Integer typeId;
 	private Integer resourceId;
-	private Integer instanceId;
-	private String ip;
+	private Integer instanceId;	
+	
+	@Column(unique = true, nullable = false)
 	private String name;
 
 	@ManyToOne
@@ -41,6 +38,9 @@ public class Resource {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resource")
 	private Set<ResourcePropertyValue> resourcePropertyValues;
+	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resource")
+	private Set<Metric> metrics;
 	
 	
 	@OneToMany(cascade=CascadeType.ALL)	
@@ -62,5 +62,4 @@ public class Resource {
 	public void addChild(Resource resource){
 		this.getChildren().add(resource);
 	}
-
 }

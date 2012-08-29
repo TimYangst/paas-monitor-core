@@ -4,6 +4,7 @@
 package org.seforge.monitor.domain;
 
 import java.util.Set;
+import org.seforge.monitor.domain.MetricTemplate;
 import org.seforge.monitor.domain.Resource;
 import org.seforge.monitor.domain.ResourcePropertyKey;
 import org.seforge.monitor.domain.ResourcePrototype;
@@ -48,6 +49,14 @@ privileged aspect ResourcePrototype_Roo_JavaBean {
     
     public void ResourcePrototype.setResources(Set<Resource> resources) {
         this.resources = resources;
+    }
+    
+    public Set<MetricTemplate> ResourcePrototype.getMetricTemplates() {
+        return this.metricTemplates;
+    }
+    
+    public void ResourcePrototype.setMetricTemplates(Set<MetricTemplate> metricTemplates) {
+        this.metricTemplates = metricTemplates;
     }
     
 }

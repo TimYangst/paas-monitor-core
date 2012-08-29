@@ -38,6 +38,9 @@ public class ResourcePrototype {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resourcePrototype")
 	private Set<Resource> resources;	
 	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resourcePrototype")
+	private Set<MetricTemplate> metricTemplates;	
+	
 	
 	public ResourcePrototype(String name, Integer typeId){
 		this.name = name;
@@ -45,14 +48,14 @@ public class ResourcePrototype {
 	}
 	
 	public static ResourcePrototype findResourcePrototypeByName(String name) {
-	        if (name == null || name.length() == 0) throw new IllegalArgumentException("The name argument is required");
-	        EntityManager em = ResourcePrototype.entityManager();
-	        TypedQuery<ResourcePrototype> q = em.createQuery("SELECT o FROM ResourcePrototype AS o WHERE o.name = :name", ResourcePrototype.class);
-	        q.setParameter("name", name);
-	        List<ResourcePrototype> result = q.getResultList();
-	        if(!result.isEmpty())
-	        	return result.get(0);
-	        else
-	        	return null;        
-	    }	
+        if (name == null || name.length() == 0) throw new IllegalArgumentException("The name argument is required");
+        EntityManager em = ResourcePrototype.entityManager();
+        TypedQuery<ResourcePrototype> q = em.createQuery("SELECT o FROM ResourcePrototype AS o WHERE o.name = :name", ResourcePrototype.class);
+        q.setParameter("name", name);
+        List<ResourcePrototype> result = q.getResultList();
+        if(!result.isEmpty())
+        	return result.get(0);
+        else
+        	return null;        
+    }	
 }
