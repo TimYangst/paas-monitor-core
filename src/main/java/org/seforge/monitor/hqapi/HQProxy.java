@@ -3,6 +3,7 @@ package org.seforge.monitor.hqapi;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -21,6 +22,7 @@ import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.seforge.monitor.domain.ResourcePropertyKey;
 import org.seforge.monitor.domain.ResourcePropertyValue;
+import org.seforge.monitor.exception.NotMonitoredException;
 import org.seforge.monitor.service.PrototypeMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,10 +63,20 @@ public class HQProxy {
 		return resources;
 	}
 	
-	public Resource getPlatformResource(String fqdn, boolean verbose, boolean children) throws IOException{		
-		ResourceApi resourceApi = hqapi.getResourceApi();		
-		return resourceApi.getPlatformResourceByFqdn(fqdn, verbose, children).getResource();		
-	}	
+	public Resource getVimResource(String fqdn, boolean verbose, boolean children) throws IOException, NotMonitoredException{		
+		ResourceApi resourceApi = hqapi.getResourceApi();	
+		Resource vim = resourceApi.getPlatformResourceByFqdn(fqdn, verbose, children).getResource();	
+		if(vim == null)
+			throw new NotMonitoredException("Vim of Ip " + fqdn + " is not monitored.");
+		return 	vim;
+	}
+	
+	
+	public Resource createServerResource(ResourcePrototype resourcePrototype, Resource parent, String name, Map<String,String> configs) throws IOException{
+		ResourceApi resourceApi = hqapi.getResourceApi();
+		Resource server = resourceApi.createServer(resourcePrototype, parent, name, configs).getResource();
+		return server;	
+	}
 
 	@Transactional
 	public org.seforge.monitor.domain.Resource saveResource(Resource resource, org.seforge.monitor.domain.Resource parent, boolean cascade) {
@@ -91,7 +103,7 @@ public class HQProxy {
 			} catch (IOException e) {
 				log.error("Cannot get metric templates of Resource Prototype "
 						+ resource.getResourcePrototype().getName());
-			}
+			}			
 		}
 
 		// Third, save the resource

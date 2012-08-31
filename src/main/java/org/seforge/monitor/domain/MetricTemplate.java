@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -22,7 +23,8 @@ import org.springframework.roo.addon.tostring.RooToString;
 @Table(uniqueConstraints=@UniqueConstraint(columnNames = {"name", "resource_prototype"})) 
 public class MetricTemplate {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "metric_template_seq")
+    @SequenceGenerator(name = "metric_template_seq", sequenceName = "metric_template_seq", allocationSize = 1)
 	@Column(name = "id")
 	private Integer id;
 	

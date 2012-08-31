@@ -53,11 +53,19 @@ public class HQProxyTest extends AbstractTransactionalJUnit4SpringContextTests {
 //	}
 	
 	
+//	@Test
+//	public void testSaveResources() throws IOException{
+//		Resource r = proxy.getPlatformResource("192.168.4.165", true, true);
+//		proxy.saveResource(r, null, true);
+////		System.out.println(org.seforge.monitor.domain.Resource.countResources());
+//	}
+	
 	@Test
-	public void testSaveResources() throws IOException{
-		Resource r = proxy.getPlatformResource("192.168.4.165", true, true);
-		proxy.saveResource(r, null, true);
-//		System.out.println(org.seforge.monitor.domain.Resource.countResources());
+	public void testResourceQuery() throws IOException{
+		org.seforge.monitor.domain.Resource r = org.seforge.monitor.domain.Resource.findPhymByIp("192.168.4.59");
+		if(r!=null){
+			System.out.println(r.getName());
+		}
 	}
 	
 

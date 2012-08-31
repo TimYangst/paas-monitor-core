@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.TypedQuery;
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
@@ -23,7 +24,8 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooJson
 public class ResourcePrototype {	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "resource_prototype_seq")
+    @SequenceGenerator(name = "resource_prototype_seq", sequenceName = "resource_prototype_seq", allocationSize = 1)
 	@Column(name = "id")
 	private Integer id;
 	
