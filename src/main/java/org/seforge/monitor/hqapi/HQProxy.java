@@ -171,6 +171,15 @@ public class HQProxy {
 				.getMetricTemplate();
 	}
 	
+	
+	public List<MetricTemplate> getMetricTemplatesByResourcePrototype(
+			String name) throws IOException {
+		ResourceApi api = hqapi.getResourceApi();		
+		ResourcePrototype prototype = api.getResourcePrototype(name)
+				.getResourcePrototype();
+		return getMetricTemplatesByResourcePrototype(prototype);
+	}
+	
     private String getFqdn(Resource r) {
         String fqdn = null;
         for (ResourceInfo ri : r.getResourceInfo()) {
