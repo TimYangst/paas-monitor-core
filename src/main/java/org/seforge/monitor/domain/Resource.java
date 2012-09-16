@@ -40,6 +40,9 @@ public class Resource {
 
 	@ManyToOne
 	private ResourcePrototype resourcePrototype;
+	
+	@ManyToOne
+	private Group group;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resource")
 	private Set<ResourcePropertyValue> resourcePropertyValues;

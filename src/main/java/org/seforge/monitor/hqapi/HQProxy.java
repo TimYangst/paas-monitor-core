@@ -137,6 +137,7 @@ public class HQProxy {
 		}
 
 		// Last, save the enabled metrics of the resource
+		/*
 		try {
 			for (Metric metric : getMetricsByResource(resource)) {
 				org.seforge.monitor.domain.Metric m = new org.seforge.monitor.domain.Metric(
@@ -155,7 +156,7 @@ public class HQProxy {
 			log.error("Cannot get metricss of Resource "
 					+ resource.getResourcePrototype().getName());
 		}
-		
+		*/
 		if(cascade && !resource.getResource().isEmpty()){
 			for(Resource child : resource.getResource()){
 				saveResource(child, r, cascade);
@@ -203,7 +204,7 @@ public class HQProxy {
 		Set<org.seforge.monitor.domain.Metric> metricSet = r.getMetrics();
 		for (org.seforge.monitor.domain.Metric m : metricSet) {
 			Metric metric = new Metric();
-			metric.setId(m.getMetricId());
+//			metric.setId(m.getMetricId());
 			metrics.add(metric);
 		}
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
@@ -213,7 +214,7 @@ public class HQProxy {
 	public LastMetricData getLastMetricData(org.seforge.monitor.domain.Metric m)
 			throws IOException {
 		Metric metric = new Metric();
-		metric.setId(m.getMetricId());
+//		metric.setId(m.getMetricId());
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
 		return metricDataApi.getData(metric).getLastMetricData();
 	}
@@ -221,7 +222,7 @@ public class HQProxy {
 	public MetricData getMetricData(org.seforge.monitor.domain.Metric m,
 			long start, long end) throws IOException {
 		Metric metric = new Metric();
-		metric.setId(m.getMetricId());
+//		metric.setId(m.getMetricId());
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
 		return metricDataApi.getData(metric, start, end).getMetricData();
 	}
@@ -233,7 +234,7 @@ public class HQProxy {
 		Set<org.seforge.monitor.domain.Metric> metricSet = r.getMetrics();
 		for (org.seforge.monitor.domain.Metric m : metricSet) {
 			Metric metric = new Metric();
-			metric.setId(m.getMetricId());
+//			metric.setId(m.getMetricId());
 			metrics.add(metric);
 		}
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();

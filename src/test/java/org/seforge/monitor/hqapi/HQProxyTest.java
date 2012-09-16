@@ -3,9 +3,13 @@ package org.seforge.monitor.hqapi;
 import java.io.IOException;
 import java.util.List;
 
+import org.hyperic.hq.hqapi1.GroupApi;
 import org.hyperic.hq.hqapi1.MetricApi;
 import org.hyperic.hq.hqapi1.MetricDataApi;
 import org.hyperic.hq.hqapi1.ResourceEdgeApi;
+import org.hyperic.hq.hqapi1.types.Group;
+import org.hyperic.hq.hqapi1.types.GroupResponse;
+import org.hyperic.hq.hqapi1.types.GroupsResponse;
 import org.hyperic.hq.hqapi1.types.Metric;
 import org.hyperic.hq.hqapi1.types.MetricTemplate;
 import org.hyperic.hq.hqapi1.types.MetricTemplatesResponse;
@@ -62,10 +66,16 @@ public class HQProxyTest extends AbstractTransactionalJUnit4SpringContextTests {
 	
 	@Test
 	public void testResourceQuery() throws IOException{
-		org.seforge.monitor.domain.Resource r = org.seforge.monitor.domain.Resource.findPhymByIp("192.168.4.59");
-		if(r!=null){
-			System.out.println(r.getName());
-		}
+		
+			GroupApi api = proxy.getHQApi().getGroupApi();
+
+		    GroupsResponse groupResponse = api.getGroups();
+		   Group group = new Group();
+//		   group.
+		    List groups = groupResponse.getGroup();
+
+		    System.out.println(groups.size());
+		
 	}
 	
 

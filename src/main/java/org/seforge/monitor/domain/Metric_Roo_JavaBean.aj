@@ -3,9 +3,9 @@
 
 package org.seforge.monitor.domain;
 
+import org.seforge.monitor.domain.Group;
 import org.seforge.monitor.domain.Metric;
 import org.seforge.monitor.domain.MetricTemplate;
-import org.seforge.monitor.domain.Resource;
 
 privileged aspect Metric_Roo_JavaBean {
     
@@ -25,20 +25,12 @@ privileged aspect Metric_Roo_JavaBean {
         this.interval = interval;
     }
     
-    public Integer Metric.getMetricId() {
-        return this.metricId;
+    public Group Metric.getGroup() {
+        return this.group;
     }
     
-    public void Metric.setMetricId(Integer metricId) {
-        this.metricId = metricId;
-    }
-    
-    public Resource Metric.getResource() {
-        return this.resource;
-    }
-    
-    public void Metric.setResource(Resource resource) {
-        this.resource = resource;
+    public void Metric.setGroup(Group group) {
+        this.group = group;
     }
     
     public MetricTemplate Metric.getMetricTemplate() {
