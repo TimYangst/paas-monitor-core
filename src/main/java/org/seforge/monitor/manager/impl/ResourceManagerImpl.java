@@ -21,4 +21,14 @@ public class ResourceManagerImpl implements ResourceManager{
 		return Resource.findResourcesByTypeIdEquals(ResourceType.PHYSICAL_MACHINE).getResultList();		
 	}
 
+	@Override
+	@Transactional
+	public void addNewServer(String jmxPort, String path, String serviceName) {
+		// TODO 
+		//先调用proxy.createServerResource把resource通过hqapi添加到hyperic server中，参见test中CreateTomcatServer.java中的内容
+		//如果成功，获取相关的hyperic端resource信
+		//根据得到的信息，在数据库中存入该resource
+		
+	}
+
 }
