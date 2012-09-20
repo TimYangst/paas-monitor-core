@@ -1,43 +1,37 @@
 package org.seforge.monitor.domain;
 
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.json.RooJson;
 import org.springframework.roo.addon.tostring.RooToString;
 
+
 @RooJavaBean
 @RooToString
 @RooJpaActiveRecord
 @RooJson
-@Table(uniqueConstraints=@UniqueConstraint(columnNames = {"resource_group", "metric_template"})) 
-public class Metric {
+public class ResourceGroup {
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "metric_seq")
-    @SequenceGenerator(name = "metric_seq", sequenceName = "metric_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "resource_group_seq")
+    @SequenceGenerator(name = "resource_group_seq", sequenceName = "resource_group_seq", allocationSize = 1)
 	@Column(name = "id")
 	private Integer id;
 	
-	@Column(name = "monitor_interval")
-	private Long interval;	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resourceGroup")
+	private Set<Resource> resources;
 	
 	@ManyToOne
-	private ResourceGroup resourceGroup;
-	
-	@ManyToOne
-	private MetricTemplate metricTemplate;
-	
-	
-	public Metric(org.hyperic.hq.hqapi1.types.Metric metric){
-		this.interval = metric.getInterval();		
-	}
+	private GroupOwner groupOwner;
 
 }

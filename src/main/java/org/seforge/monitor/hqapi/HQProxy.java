@@ -198,6 +198,7 @@ public class HQProxy {
 		return metricApi.getMetrics(resource, true).getMetric();
 	}
 
+	/*
 	public List<LastMetricData> getLastMetricData(
 			org.seforge.monitor.domain.Resource r) throws IOException {
 		List<Metric> metrics = new ArrayList<Metric>();
@@ -210,6 +211,7 @@ public class HQProxy {
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
 		return metricDataApi.getData(metrics).getLastMetricData();
 	}
+	*/
 
 	public LastMetricData getLastMetricData(org.seforge.monitor.domain.Metric m)
 			throws IOException {
@@ -227,6 +229,7 @@ public class HQProxy {
 		return metricDataApi.getData(metric, start, end).getMetricData();
 	}
 
+	/*
 	public List<MetricData> getMetricData(
 			org.seforge.monitor.domain.Resource r, long start, long end)
 			throws IOException {
@@ -240,5 +243,6 @@ public class HQProxy {
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
 		return metricDataApi.getData(metrics, start, end).getMetricData();
 	}
+	*/
 
 }

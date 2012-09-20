@@ -4,9 +4,8 @@
 package org.seforge.monitor.domain;
 
 import java.util.Set;
-import org.seforge.monitor.domain.Group;
-import org.seforge.monitor.domain.Metric;
 import org.seforge.monitor.domain.Resource;
+import org.seforge.monitor.domain.ResourceGroup;
 import org.seforge.monitor.domain.ResourcePropertyValue;
 import org.seforge.monitor.domain.ResourcePrototype;
 
@@ -60,12 +59,12 @@ privileged aspect Resource_Roo_JavaBean {
         this.resourcePrototype = resourcePrototype;
     }
     
-    public Group Resource.getGroup() {
-        return this.group;
+    public ResourceGroup Resource.getResourceGroup() {
+        return this.resourceGroup;
     }
     
-    public void Resource.setGroup(Group group) {
-        this.group = group;
+    public void Resource.setResourceGroup(ResourceGroup resourceGroup) {
+        this.resourceGroup = resourceGroup;
     }
     
     public Set<ResourcePropertyValue> Resource.getResourcePropertyValues() {
@@ -74,14 +73,6 @@ privileged aspect Resource_Roo_JavaBean {
     
     public void Resource.setResourcePropertyValues(Set<ResourcePropertyValue> resourcePropertyValues) {
         this.resourcePropertyValues = resourcePropertyValues;
-    }
-    
-    public Set<Metric> Resource.getMetrics() {
-        return this.metrics;
-    }
-    
-    public void Resource.setMetrics(Set<Metric> metrics) {
-        this.metrics = metrics;
     }
     
     public Set<Resource> Resource.getChildren() {

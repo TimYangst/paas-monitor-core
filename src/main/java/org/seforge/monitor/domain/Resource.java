@@ -42,13 +42,10 @@ public class Resource {
 	private ResourcePrototype resourcePrototype;
 	
 	@ManyToOne
-	private Group group;
+	private ResourceGroup resourceGroup;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resource")
 	private Set<ResourcePropertyValue> resourcePropertyValues;
-	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resource")
-	private Set<Metric> metrics;
 	
 	
 	@OneToMany(cascade=CascadeType.ALL)	

@@ -4,8 +4,8 @@
 package org.seforge.monitor.domain;
 
 import java.util.Set;
-import org.seforge.monitor.domain.Group;
 import org.seforge.monitor.domain.GroupOwner;
+import org.seforge.monitor.domain.ResourceGroup;
 
 privileged aspect GroupOwner_Roo_JavaBean {
     
@@ -17,12 +17,12 @@ privileged aspect GroupOwner_Roo_JavaBean {
         this.id = id;
     }
     
-    public Set<Group> GroupOwner.getGroups() {
-        return this.groups;
+    public Set<ResourceGroup> GroupOwner.getResourceGroups() {
+        return this.resourceGroups;
     }
     
-    public void GroupOwner.setGroups(Set<Group> groups) {
-        this.groups = groups;
+    public void GroupOwner.setResourceGroups(Set<ResourceGroup> resourceGroups) {
+        this.resourceGroups = resourceGroups;
     }
     
 }

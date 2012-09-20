@@ -30,7 +30,7 @@ public class GroupOwner {
 	//如何与部署系统的用户关联？
 	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "groupOwner")
-	private Set<Group> groups;
+	private Set<ResourceGroup> resourceGroups;
 	
 
 }
