@@ -9,7 +9,9 @@ import org.seforge.monitor.domain.ResourcePrototype;
 import org.seforge.monitor.hqapi.HQProxy;
 import org.seforge.monitor.manager.MetricManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MetricManagerImpl implements MetricManager{
 	
 	@Autowired
@@ -33,7 +35,7 @@ public class MetricManagerImpl implements MetricManager{
 	
 	
 	public List<Metric> getMetricsByResourcePrototypeAndGroup(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit){
-		return Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList().subList(start, start + limit -1);
+		return Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList().subList(start, start + limit);
 	}
 
 }
