@@ -6,6 +6,7 @@ package org.seforge.monitor.domain;
 import org.seforge.monitor.domain.Metric;
 import org.seforge.monitor.domain.MetricTemplate;
 import org.seforge.monitor.domain.ResourceGroup;
+import org.seforge.monitor.domain.ResourcePrototype;
 
 privileged aspect Metric_Roo_JavaBean {
     
@@ -23,6 +24,22 @@ privileged aspect Metric_Roo_JavaBean {
     
     public void Metric.setInterval(Long interval) {
         this.interval = interval;
+    }
+    
+    public boolean Metric.isEnabled() {
+        return this.enabled;
+    }
+    
+    public void Metric.setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    public ResourcePrototype Metric.getResourcePrototype() {
+        return this.resourcePrototype;
+    }
+    
+    public void Metric.setResourcePrototype(ResourcePrototype resourcePrototype) {
+        this.resourcePrototype = resourcePrototype;
     }
     
     public ResourceGroup Metric.getResourceGroup() {

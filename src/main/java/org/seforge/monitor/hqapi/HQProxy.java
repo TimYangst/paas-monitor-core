@@ -20,6 +20,8 @@ import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceInfo;
 import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
+import org.hyperic.hq.hqapi1.types.ResponseStatus;
+import org.seforge.monitor.domain.ResourceGroup;
 import org.seforge.monitor.domain.ResourcePropertyKey;
 import org.seforge.monitor.domain.ResourcePropertyValue;
 import org.seforge.monitor.exception.NotMonitoredException;
@@ -55,31 +57,37 @@ public class HQProxy {
 
 	public List<Resource> getWin32PlatformResources(boolean verbose,
 			boolean children) throws IOException {
-		ResourceApi api = hqapi.getResourceApi();		
+		ResourceApi api = hqapi.getResourceApi();
 		ResourcePrototype win32Prototype = api.getResourcePrototype("Win32")
 				.getResourcePrototype();
 		List<Resource> resources = api.getResources(win32Prototype, verbose,
 				children).getResource();
 		return resources;
 	}
-	
-	public Resource getVimResource(String fqdn, boolean verbose, boolean children) throws IOException, NotMonitoredException{		
-		ResourceApi resourceApi = hqapi.getResourceApi();	
-		Resource vim = resourceApi.getPlatformResourceByFqdn(fqdn, verbose, children).getResource();	
-		if(vim == null)
-			throw new NotMonitoredException("Vim of Ip " + fqdn + " is not monitored.");
-		return 	vim;
-	}
-	
-	
-	public Resource createServerResource(ResourcePrototype resourcePrototype, Resource parent, String name, Map<String,String> configs) throws IOException{
+
+	public Resource getVimResource(String fqdn, boolean verbose,
+			boolean children) throws IOException, NotMonitoredException {
 		ResourceApi resourceApi = hqapi.getResourceApi();
-		Resource server = resourceApi.createServer(resourcePrototype, parent, name, configs).getResource();
-		return server;	
+		Resource vim = resourceApi.getPlatformResourceByFqdn(fqdn, verbose,
+				children).getResource();
+		if (vim == null)
+			throw new NotMonitoredException("Vim of Ip " + fqdn
+					+ " is not monitored.");
+		return vim;
+	}
+
+	public Resource createServerResource(ResourcePrototype resourcePrototype,
+			Resource parent, String name, Map<String, String> configs)
+			throws IOException {
+		ResourceApi resourceApi = hqapi.getResourceApi();
+		Resource server = resourceApi.createServer(resourcePrototype, parent,
+				name, configs).getResource();
+		return server;
 	}
 
 	@Transactional
-	public org.seforge.monitor.domain.Resource saveResource(Resource resource, org.seforge.monitor.domain.Resource parent, boolean cascade) {
+	public org.seforge.monitor.domain.Resource saveResource(Resource resource,
+			org.seforge.monitor.domain.Resource parent, boolean cascade) {
 		// First, save the prototype of the resource if it does not exist
 		String ptName = resource.getResourcePrototype().getName();
 		Integer typeId = mapping.getTypeByPrototype(ptName);
@@ -103,7 +111,7 @@ public class HQProxy {
 			} catch (IOException e) {
 				log.error("Cannot get metric templates of Resource Prototype "
 						+ resource.getResourcePrototype().getName());
-			}			
+			}
 		}
 
 		// Third, save the resource
@@ -111,12 +119,12 @@ public class HQProxy {
 		r.setName(resource.getName());
 		r.setTypeId(rpt.getTypeId());
 		r.setResourceId(resource.getId());
-		r.setInstanceId(resource.getInstanceId());		
+		r.setInstanceId(resource.getInstanceId());
 		r.setResourcePrototype(rpt);
-		if(parent !=null){
+		if (parent != null) {
 			r.setParent(parent);
-		}		
-		r.persist();	
+		}
+		r.persist();
 
 		// Fourth, save the properties of the resource
 		List<ResourceProperty> rpList = resource.getResourceProperty();
@@ -138,27 +146,19 @@ public class HQProxy {
 
 		// Last, save the enabled metrics of the resource
 		/*
-		try {
-			for (Metric metric : getMetricsByResource(resource)) {
-				org.seforge.monitor.domain.Metric m = new org.seforge.monitor.domain.Metric(
-						metric);
-				m.setResource(r);
-				m.setInterval(metric.getInterval());
-				m.setMetricId(metric.getId());
-				org.seforge.monitor.domain.MetricTemplate mt = org.seforge.monitor.domain.MetricTemplate
-						.findMetricTemplateByNameAndResourcePrototype(
-								metric.getName(), rpt);
-				if (mt != null)
-					m.setMetricTemplate(mt);
-				m.persist();
-			}
-		} catch (IOException e) {
-			log.error("Cannot get metricss of Resource "
-					+ resource.getResourcePrototype().getName());
-		}
-		*/
-		if(cascade && !resource.getResource().isEmpty()){
-			for(Resource child : resource.getResource()){
+		 * try { for (Metric metric : getMetricsByResource(resource)) {
+		 * org.seforge.monitor.domain.Metric m = new
+		 * org.seforge.monitor.domain.Metric( metric); m.setResource(r);
+		 * m.setInterval(metric.getInterval()); m.setMetricId(metric.getId());
+		 * org.seforge.monitor.domain.MetricTemplate mt =
+		 * org.seforge.monitor.domain.MetricTemplate
+		 * .findMetricTemplateByNameAndResourcePrototype( metric.getName(),
+		 * rpt); if (mt != null) m.setMetricTemplate(mt); m.persist(); } } catch
+		 * (IOException e) { log.error("Cannot get metricss of Resource " +
+		 * resource.getResourcePrototype().getName()); }
+		 */
+		if (cascade && !resource.getResource().isEmpty()) {
+			for (Resource child : resource.getResource()) {
 				saveResource(child, r, cascade);
 			}
 		}
@@ -171,26 +171,25 @@ public class HQProxy {
 		return metricApi.getMetricTemplates(resourcePrototype)
 				.getMetricTemplate();
 	}
-	
-	
+
 	public List<MetricTemplate> getMetricTemplatesByResourcePrototype(
 			String name) throws IOException {
-		ResourceApi api = hqapi.getResourceApi();		
+		ResourceApi api = hqapi.getResourceApi();
 		ResourcePrototype prototype = api.getResourcePrototype(name)
 				.getResourcePrototype();
 		return getMetricTemplatesByResourcePrototype(prototype);
 	}
-	
-    private String getFqdn(Resource r) {
-        String fqdn = null;
-        for (ResourceInfo ri : r.getResourceInfo()) {
-            if ("fqdn".equals(ri.getKey())) {
-                fqdn = ri.getValue();
-                break;
-            }
-        }
-        return fqdn;
-    }
+
+	private String getFqdn(Resource r) {
+		String fqdn = null;
+		for (ResourceInfo ri : r.getResourceInfo()) {
+			if ("fqdn".equals(ri.getKey())) {
+				fqdn = ri.getValue();
+				break;
+			}
+		}
+		return fqdn;
+	}
 
 	private List<Metric> getMetricsByResource(Resource resource)
 			throws IOException {
@@ -199,24 +198,20 @@ public class HQProxy {
 	}
 
 	/*
-	public List<LastMetricData> getLastMetricData(
-			org.seforge.monitor.domain.Resource r) throws IOException {
-		List<Metric> metrics = new ArrayList<Metric>();
-		Set<org.seforge.monitor.domain.Metric> metricSet = r.getMetrics();
-		for (org.seforge.monitor.domain.Metric m : metricSet) {
-			Metric metric = new Metric();
-//			metric.setId(m.getMetricId());
-			metrics.add(metric);
-		}
-		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
-		return metricDataApi.getData(metrics).getLastMetricData();
-	}
-	*/
+	 * public List<LastMetricData> getLastMetricData(
+	 * org.seforge.monitor.domain.Resource r) throws IOException { List<Metric>
+	 * metrics = new ArrayList<Metric>(); Set<org.seforge.monitor.domain.Metric>
+	 * metricSet = r.getMetrics(); for (org.seforge.monitor.domain.Metric m :
+	 * metricSet) { Metric metric = new Metric(); //
+	 * metric.setId(m.getMetricId()); metrics.add(metric); } MetricDataApi
+	 * metricDataApi = hqapi.getMetricDataApi(); return
+	 * metricDataApi.getData(metrics).getLastMetricData(); }
+	 */
 
 	public LastMetricData getLastMetricData(org.seforge.monitor.domain.Metric m)
 			throws IOException {
 		Metric metric = new Metric();
-//		metric.setId(m.getMetricId());
+		// metric.setId(m.getMetricId());
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
 		return metricDataApi.getData(metric).getLastMetricData();
 	}
@@ -224,25 +219,72 @@ public class HQProxy {
 	public MetricData getMetricData(org.seforge.monitor.domain.Metric m,
 			long start, long end) throws IOException {
 		Metric metric = new Metric();
-//		metric.setId(m.getMetricId());
+		MetricApi metricApi = hqapi.getMetricApi();
+		// metricApi.
+		// metric.setId(m.getMetricId());
 		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
 		return metricDataApi.getData(metric, start, end).getMetricData();
 	}
 
-	/*
-	public List<MetricData> getMetricData(
-			org.seforge.monitor.domain.Resource r, long start, long end)
-			throws IOException {
-		List<Metric> metrics = new ArrayList<Metric>();
-		Set<org.seforge.monitor.domain.Metric> metricSet = r.getMetrics();
-		for (org.seforge.monitor.domain.Metric m : metricSet) {
-			Metric metric = new Metric();
-//			metric.setId(m.getMetricId());
-			metrics.add(metric);
+	public Metric getHqMetircByResourceAndTemplateName(Resource resource,
+			String templateName) {
+		MetricApi metricApi = hqapi.getMetricApi();
+		try {
+			List<Metric> hqmetrics = metricApi.getMetrics(resource, false)
+					.getMetric();
+			for (Metric m : hqmetrics) {
+				if (m.getMetricTemplate().getName().equals(templateName))
+					return m;
+			}
+			return null;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
 		}
-		MetricDataApi metricDataApi = hqapi.getMetricDataApi();
-		return metricDataApi.getData(metrics, start, end).getMetricData();
 	}
-	*/
+
+	public boolean syncMetrics(List<org.seforge.monitor.domain.Metric> metrics) {
+		ResourceApi resourceApi = hqapi.getResourceApi();
+		MetricApi metricApi = hqapi.getMetricApi();
+		List<Metric> toBeSynced = new ArrayList<Metric>();
+		try {
+			for (org.seforge.monitor.domain.Metric m : metrics) {
+				ResourceGroup group = m.getResourceGroup();
+				for (org.seforge.monitor.domain.Resource resource : group
+						.getResources()) {
+					Resource r = resourceApi.getResource(
+							resource.getResourceId(), false, false)
+							.getResource();
+					Metric metric = getHqMetircByResourceAndTemplateName(r, m
+							.getMetricTemplate().getName());
+					metric.setEnabled(true);
+					metric.setInterval(m.getInterval());
+					toBeSynced.add(metric);
+				}
+
+			}
+			ResponseStatus response = metricApi.syncMetrics(toBeSynced).getStatus();
+			if (response.equals(ResponseStatus.SUCCESS))
+				return true;
+			else
+				return false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}		
+	}
+
+	/*
+	 * public List<MetricData> getMetricData(
+	 * org.seforge.monitor.domain.Resource r, long start, long end) throws
+	 * IOException { List<Metric> metrics = new ArrayList<Metric>();
+	 * Set<org.seforge.monitor.domain.Metric> metricSet = r.getMetrics(); for
+	 * (org.seforge.monitor.domain.Metric m : metricSet) { Metric metric = new
+	 * Metric(); // metric.setId(m.getMetricId()); metrics.add(metric); }
+	 * MetricDataApi metricDataApi = hqapi.getMetricDataApi(); return
+	 * metricDataApi.getData(metrics, start, end).getMetricData(); }
+	 */
 
 }

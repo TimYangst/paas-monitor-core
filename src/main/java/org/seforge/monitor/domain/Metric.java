@@ -16,7 +16,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 
 @RooJavaBean
 @RooToString
-@RooJpaActiveRecord
+@RooJpaActiveRecord(finders = {"findMetricsByResourceGroupAndResourcePrototype"})
 @RooJson
 @Table(uniqueConstraints=@UniqueConstraint(columnNames = {"resource_group", "metric_template"})) 
 public class Metric {
@@ -29,15 +29,16 @@ public class Metric {
 	@Column(name = "monitor_interval")
 	private Long interval;	
 	
+	private boolean enabled; 
+	
+	@ManyToOne
+	private ResourcePrototype resourcePrototype;
+	
 	@ManyToOne
 	private ResourceGroup resourceGroup;
 	
 	@ManyToOne
 	private MetricTemplate metricTemplate;
-	
-	
-	public Metric(org.hyperic.hq.hqapi1.types.Metric metric){
-		this.interval = metric.getInterval();		
-	}
+
 
 }

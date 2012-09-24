@@ -16,10 +16,6 @@ privileged aspect Metric_Roo_Jpa_Entity {
     @Column(name = "version")
     private Integer Metric.version;
     
-    public Metric.new() {
-        super();
-    }
-
     public Integer Metric.getVersion() {
         return this.version;
     }
