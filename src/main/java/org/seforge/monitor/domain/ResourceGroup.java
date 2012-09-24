@@ -7,9 +7,12 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.JoinColumn;
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
@@ -28,8 +31,9 @@ public class ResourceGroup {
 	@Column(name = "id")
 	private Integer id;
 	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resourceGroup")
-	private Set<Resource> resources;
+	@ManyToMany(cascade = CascadeType.REFRESH)  
+    @JoinTable(name = "resource_resourcegroup", inverseJoinColumns = @JoinColumn(name = "resource_id"), joinColumns = @JoinColumn(name = "resource_group_id"))   
+   	private Set<Resource> resources;
 	
 	@ManyToOne
 	private GroupOwner groupOwner;

@@ -27,6 +27,10 @@ public class GroupOwner {
 	@Column(name = "id")
 	private Integer id;
 	
+	private String name;
+	
+	
+	
 	//如何与部署系统的用户关联？
 	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "groupOwner")

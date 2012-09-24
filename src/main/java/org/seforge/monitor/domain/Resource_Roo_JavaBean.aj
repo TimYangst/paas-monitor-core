@@ -59,12 +59,12 @@ privileged aspect Resource_Roo_JavaBean {
         this.resourcePrototype = resourcePrototype;
     }
     
-    public ResourceGroup Resource.getResourceGroup() {
-        return this.resourceGroup;
+    public Set<ResourceGroup> Resource.getResourceGroups() {
+        return this.resourceGroups;
     }
     
-    public void Resource.setResourceGroup(ResourceGroup resourceGroup) {
-        this.resourceGroup = resourceGroup;
+    public void Resource.setResourceGroups(Set<ResourceGroup> resourceGroups) {
+        this.resourceGroups = resourceGroups;
     }
     
     public Set<ResourcePropertyValue> Resource.getResourcePropertyValues() {

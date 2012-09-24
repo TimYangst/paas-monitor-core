@@ -17,6 +17,14 @@ privileged aspect GroupOwner_Roo_JavaBean {
         this.id = id;
     }
     
+    public String GroupOwner.getName() {
+        return this.name;
+    }
+    
+    public void GroupOwner.setName(String name) {
+        this.name = name;
+    }
+    
     public Set<ResourceGroup> GroupOwner.getResourceGroups() {
         return this.resourceGroups;
     }

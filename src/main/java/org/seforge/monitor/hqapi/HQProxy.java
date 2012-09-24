@@ -2,6 +2,7 @@ package org.seforge.monitor.hqapi;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,6 +89,7 @@ public class HQProxy {
 	@Transactional
 	public org.seforge.monitor.domain.Resource saveResource(Resource resource,
 			org.seforge.monitor.domain.Resource parent, boolean cascade) {
+		ResourceGroup resourceGroup = ResourceGroup.findResourceGroup(1);
 		// First, save the prototype of the resource if it does not exist
 		String ptName = resource.getResourcePrototype().getName();
 		Integer typeId = mapping.getTypeByPrototype(ptName);
@@ -102,16 +104,27 @@ public class HQProxy {
 			try {
 				templates = getMetricTemplatesByResourcePrototype(resource
 						.getResourcePrototype());
+				int metricSize = org.seforge.monitor.domain.Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, rpt).getResultList().size();
 				for (MetricTemplate template : templates) {
 					org.seforge.monitor.domain.MetricTemplate metricTemplate = new org.seforge.monitor.domain.MetricTemplate(
 							template);
 					metricTemplate.setResourcePrototype(rpt);
-					metricTemplate.persist();
+					metricTemplate.persist();					
+					if(metricSize==0){						
+						org.seforge.monitor.domain.Metric metric = new org.seforge.monitor.domain.Metric();
+						metric.setResourceGroup(resourceGroup);
+						metric.setMetricTemplate(metricTemplate);
+						metric.setResourcePrototype(rpt);
+						metric.setInterval(metricTemplate.getDefaultInterval());
+						metric.setEnabled(false);
+						metric.persist();						
+					}					
 				}
 			} catch (IOException e) {
 				log.error("Cannot get metric templates of Resource Prototype "
 						+ resource.getResourcePrototype().getName());
 			}
+			
 		}
 
 		// Third, save the resource
@@ -120,7 +133,8 @@ public class HQProxy {
 		r.setTypeId(rpt.getTypeId());
 		r.setResourceId(resource.getId());
 		r.setInstanceId(resource.getInstanceId());
-		r.setResourcePrototype(rpt);
+		r.setResourcePrototype(rpt);		
+		r.addResourceGroup(resourceGroup);
 		if (parent != null) {
 			r.setParent(parent);
 		}
@@ -142,21 +156,9 @@ public class HQProxy {
 			value.setResource(r);
 			value.setResourcePropertyKey(rpKey);
 			value.persist();
-		}
-
-		// Last, save the enabled metrics of the resource
-		/*
-		 * try { for (Metric metric : getMetricsByResource(resource)) {
-		 * org.seforge.monitor.domain.Metric m = new
-		 * org.seforge.monitor.domain.Metric( metric); m.setResource(r);
-		 * m.setInterval(metric.getInterval()); m.setMetricId(metric.getId());
-		 * org.seforge.monitor.domain.MetricTemplate mt =
-		 * org.seforge.monitor.domain.MetricTemplate
-		 * .findMetricTemplateByNameAndResourcePrototype( metric.getName(),
-		 * rpt); if (mt != null) m.setMetricTemplate(mt); m.persist(); } } catch
-		 * (IOException e) { log.error("Cannot get metricss of Resource " +
-		 * resource.getResourcePrototype().getName()); }
-		 */
+		}	
+	
+		
 		if (cascade && !resource.getResource().isEmpty()) {
 			for (Resource child : resource.getResource()) {
 				saveResource(child, r, cascade);
@@ -276,15 +278,5 @@ public class HQProxy {
 		}		
 	}
 
-	/*
-	 * public List<MetricData> getMetricData(
-	 * org.seforge.monitor.domain.Resource r, long start, long end) throws
-	 * IOException { List<Metric> metrics = new ArrayList<Metric>();
-	 * Set<org.seforge.monitor.domain.Metric> metricSet = r.getMetrics(); for
-	 * (org.seforge.monitor.domain.Metric m : metricSet) { Metric metric = new
-	 * Metric(); // metric.setId(m.getMetricId()); metrics.add(metric); }
-	 * MetricDataApi metricDataApi = hqapi.getMetricDataApi(); return
-	 * metricDataApi.getData(metrics, start, end).getMetricData(); }
-	 */
 
 }

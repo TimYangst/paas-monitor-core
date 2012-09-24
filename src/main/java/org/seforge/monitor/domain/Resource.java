@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.JoinColumn;
@@ -41,8 +42,9 @@ public class Resource {
 	@ManyToOne
 	private ResourcePrototype resourcePrototype;
 	
-	@ManyToOne
-	private ResourceGroup resourceGroup;
+	@ManyToMany(cascade = CascadeType.REFRESH)  
+    @JoinTable(name = "resource_resourcegroup", inverseJoinColumns = @JoinColumn(name = "resource_group_id"), joinColumns = @JoinColumn(name = "resource_id"))      
+	private Set<ResourceGroup> resourceGroups = new HashSet<ResourceGroup>();;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resource")
 	private Set<ResourcePropertyValue> resourcePropertyValues;
@@ -66,6 +68,10 @@ public class Resource {
 	
 	public void addChild(Resource resource){
 		this.getChildren().add(resource);
+	}
+	
+	public void addResourceGroup(ResourceGroup resourceGroup){
+		this.resourceGroups.add(resourceGroup);
 	}
 	
 	public static Resource findPhymByIp(String ip){
