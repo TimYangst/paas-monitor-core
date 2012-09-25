@@ -3,6 +3,8 @@ package org.seforge.monitor.manager.impl;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.TypedQuery;
+
 import org.seforge.monitor.domain.Metric;
 import org.seforge.monitor.domain.ResourceGroup;
 import org.seforge.monitor.domain.ResourcePrototype;
@@ -39,7 +41,12 @@ public class MetricManagerImpl implements MetricManager{
 	
 	
 	public List<Metric> getMetricsByResourcePrototypeAndGroup(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit){
-		return Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList().subList(start, start + limit);
+		List result = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();
+		int total = result.size();
+		if(start+limit < total)
+			return result.subList(start, start + limit);
+		else
+			return result.subList(start, total);
 	}
 
 }
