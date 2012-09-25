@@ -22,9 +22,13 @@ public class MetricManagerImpl implements MetricManager{
 		// TODO First, save these metrics to our database;
 		// Second, call hqproxy and update metric in hqserver
 		for(Metric metric : metrics){
-			metric.persist();			
+			Integer id = metric.getId();
+			Metric pmetric = Metric.findMetric(id);
+			pmetric.setEnabled(true);
+			pmetric.setInterval(metric.getInterval());
+			pmetric.merge();			
 		}
-		hqProxy.syncMetrics(metrics);
+//		hqProxy.syncMetrics(metrics);
 		
 	}
 
