@@ -1,10 +1,7 @@
 package org.seforge.monitor.manager.impl;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
-import javax.persistence.TypedQuery;
-
 import org.seforge.monitor.domain.Metric;
 import org.seforge.monitor.domain.ResourceGroup;
 import org.seforge.monitor.domain.ResourcePrototype;
@@ -20,7 +17,7 @@ public class MetricManagerImpl implements MetricManager{
 	private HQProxy hqProxy;
 
 	@Override
-	public void saveAndUpdateMetrics(List<Metric> metrics) {
+	public void saveAndUpdateMetrics(List<Metric> metrics, ResourcePrototype resourcePrototype) {
 		// TODO First, save these metrics to our database;
 		// Second, call hqproxy and update metric in hqserver
 		for(Metric metric : metrics){
@@ -30,7 +27,7 @@ public class MetricManagerImpl implements MetricManager{
 			pmetric.setInterval(metric.getInterval());
 			pmetric.merge();			
 		}
-//		hqProxy.syncMetrics(metrics);
+		hqProxy.syncMetrics(metrics, resourcePrototype);
 		
 	}
 
@@ -47,6 +44,16 @@ public class MetricManagerImpl implements MetricManager{
 			return result.subList(start, start + limit);
 		else
 			return result.subList(start, total);
+	}
+	
+	public List<Metric> getEnabledMetrics(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit){
+		List<Metric> all = getMetricsByResourcePrototypeAndGroup(resourcePrototype, resourceGroup);
+		ArrayList<Metric> enabledList = new ArrayList<Metric>();
+		for(Metric m : all){
+			if(m.isEnabled())
+				enabledList.add(m);
+		}
+		return enabledList.subList(start, start+limit);
 	}
 
 }

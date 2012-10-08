@@ -49,6 +49,18 @@ public class ResourcePrototype {
 		this.typeId = typeId;
 	}
 	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof ResourcePrototype){			
+			if(((ResourcePrototype)(o)).name.equals(this.name))
+				return true;
+			else
+				return false;
+		}		
+		else 
+			return false;
+	}
+	
 	public static ResourcePrototype findResourcePrototypeByName(String name) {
         if (name == null || name.length() == 0) throw new IllegalArgumentException("The name argument is required");
         EntityManager em = ResourcePrototype.entityManager();
