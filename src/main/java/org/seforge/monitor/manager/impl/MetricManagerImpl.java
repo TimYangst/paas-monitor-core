@@ -23,7 +23,7 @@ public class MetricManagerImpl implements MetricManager{
 		for(Metric metric : metrics){
 			Integer id = metric.getId();
 			Metric pmetric = Metric.findMetric(id);
-			pmetric.setEnabled(true);
+			pmetric.setEnabled(metric.isEnabled());
 			pmetric.setInterval(metric.getInterval());
 			pmetric.merge();			
 		}
@@ -38,7 +38,7 @@ public class MetricManagerImpl implements MetricManager{
 	
 	
 	public List<Metric> getMetricsByResourcePrototypeAndGroup(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit){
-		List result = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();
+		List result = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();		
 		int total = result.size();
 		if(start+limit < total)
 			return result.subList(start, start + limit);
@@ -53,7 +53,21 @@ public class MetricManagerImpl implements MetricManager{
 			if(m.isEnabled())
 				enabledList.add(m);
 		}
-		return enabledList.subList(start, start+limit);
+		if(start+limit < enabledList.size())
+			return enabledList.subList(start, start+limit);
+		else
+			return enabledList.subList(start, enabledList.size());
 	}
+	
+	public int getEnabledMetricCount(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup){
+		List<Metric> all = getMetricsByResourcePrototypeAndGroup(resourcePrototype, resourceGroup);
+		ArrayList<Metric> enabledList = new ArrayList<Metric>();
+		for(Metric m : all){
+			if(m.isEnabled())
+				enabledList.add(m);
+		}
+		return enabledList.size();
+	}
+
 
 }

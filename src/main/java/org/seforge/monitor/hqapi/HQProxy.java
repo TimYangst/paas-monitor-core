@@ -276,7 +276,7 @@ public class HQProxy {
 						if(r!=null){
 							Metric metric = getHqMetircByResourceAndTemplateName(r, m
 									.getMetricTemplate().getName());
-							metric.setEnabled(true);
+							metric.setEnabled(m.isEnabled());
 							metric.setInterval(m.getInterval());
 							toBeSynced.add(metric);
 						}						

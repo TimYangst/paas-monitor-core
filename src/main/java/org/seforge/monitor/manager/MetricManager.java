@@ -11,4 +11,5 @@ public interface MetricManager {
 	public List<Metric> getMetricsByResourcePrototypeAndGroup(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup);
 	public List<Metric> getMetricsByResourcePrototypeAndGroup(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit);	
 	public List<Metric> getEnabledMetrics(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit);
+	public int getEnabledMetricCount(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup);
 }
