@@ -15,7 +15,7 @@ privileged aspect Metric_Roo_Finder {
         if (resourceGroup == null) throw new IllegalArgumentException("The resourceGroup argument is required");
         if (resourcePrototype == null) throw new IllegalArgumentException("The resourcePrototype argument is required");
         EntityManager em = Metric.entityManager();
-        TypedQuery<Metric> q = em.createQuery("SELECT o FROM Metric AS o WHERE o.resourceGroup = :resourceGroup AND o.resourcePrototype = :resourcePrototype ORDER BY o.enabled DESC, o.metricTemplate.name ASC", Metric.class);
+        TypedQuery<Metric> q = em.createQuery("SELECT o FROM Metric AS o WHERE o.resourceGroup = :resourceGroup AND o.resourcePrototype = :resourcePrototype", Metric.class);
         q.setParameter("resourceGroup", resourceGroup);
         q.setParameter("resourcePrototype", resourcePrototype);
         return q;

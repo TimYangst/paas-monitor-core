@@ -9,5 +9,7 @@ public interface ResourceManager {
 	
 	public List<Resource> getAllPhyms();
 	
+	public List<Resource> getPhymsByGroup(int groupId);
+	
 	public void addNewServer(String jmxPort, String path, String serviceName);	
 }

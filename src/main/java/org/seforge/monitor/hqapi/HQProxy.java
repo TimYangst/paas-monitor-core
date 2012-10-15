@@ -89,7 +89,7 @@ public class HQProxy {
 	@Transactional
 	public org.seforge.monitor.domain.Resource saveResource(Resource resource,
 			org.seforge.monitor.domain.Resource parent, boolean cascade) {
-		ResourceGroup resourceGroup = ResourceGroup.findResourceGroup(1);
+		ResourceGroup resourceGroup = ResourceGroup.findResourceGroup(2);
 		// First, save the prototype of the resource if it does not exist
 		String ptName = resource.getResourcePrototype().getName();
 		Integer typeId = mapping.getTypeByPrototype(ptName);
@@ -113,10 +113,10 @@ public class HQProxy {
 					if(metricSize==0){						
 						org.seforge.monitor.domain.Metric metric = new org.seforge.monitor.domain.Metric();
 						metric.setResourceGroup(resourceGroup);
-						metric.setMetricTemplate(metricTemplate);
+						metric.setMetricTemplate(metricTemplate);						
 						metric.setResourcePrototype(rpt);
 						metric.setInterval(metricTemplate.getDefaultInterval());
-						metric.setEnabled(false);
+						metric.setEnabled(metricTemplate.isIndicator());
 						metric.persist();						
 					}					
 				}

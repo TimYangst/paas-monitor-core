@@ -1,9 +1,11 @@
 package org.seforge.monitor.manager.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.seforge.monitor.common.ResourceType;
 import org.seforge.monitor.domain.Resource;
+import org.seforge.monitor.domain.ResourceGroup;
 import org.seforge.monitor.manager.ResourceManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,20 @@ public class ResourceManagerImpl implements ResourceManager{
 	@Transactional
 	public List<Resource> getAllPhyms() {
 		return Resource.findResourcesByTypeIdEquals(ResourceType.PHYSICAL_MACHINE).getResultList();		
+	}
+	
+	@Transactional
+	public List<Resource> getPhymsByGroup(int groupId){
+		List<Resource> resources = Resource.findResourcesByTypeIdEquals(ResourceType.PHYSICAL_MACHINE).getResultList();
+		List<Resource> result = new ArrayList<Resource>();
+		for(Resource r : resources){
+			for(ResourceGroup rg : r.getResourceGroups()){
+				if(rg.getId() == groupId){
+					result.add(r);
+				}					
+			}			
+		}
+		return result;
 	}
 
 	@Override
