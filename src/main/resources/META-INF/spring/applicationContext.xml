@@ -72,6 +72,15 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	
+	<bean class="org.hyperic.hq.hqapi1.HQApi" id="hqapi">
+		<constructor-arg value="${hq.host}"/>
+		<constructor-arg value="${hq.port}"/>  
+		<constructor-arg value="${hq.secure}"/>  
+		<constructor-arg value="${hq.username}"/>  
+		<constructor-arg value="${hq.password}"/>		
+	</bean>
+	
+	
 	<bean class="org.seforge.monitor.service.PrototypeMapping" id="prototypeMapping">
 		<property name="resource" value="classpath:prototype_mapping.xml"></property>
 	</bean>

@@ -25,6 +25,14 @@ privileged aspect GroupOwner_Roo_JavaBean {
         this.name = name;
     }
     
+    public String GroupOwner.getEmail() {
+        return this.email;
+    }
+    
+    public void GroupOwner.setEmail(String email) {
+        this.email = email;
+    }
+    
     public Set<ResourceGroup> GroupOwner.getResourceGroups() {
         return this.resourceGroups;
     }

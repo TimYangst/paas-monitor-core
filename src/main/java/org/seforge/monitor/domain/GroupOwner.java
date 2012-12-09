@@ -29,6 +29,8 @@ public class GroupOwner {
 	
 	private String name;
 	
+	private String email;
+	
 	
 	
 	//如何与部署系统的用户关联？

@@ -2,17 +2,19 @@ package org.seforge.monitor.hqapi;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.hqapi1.AlertDefinitionApi;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.hqapi1.MetricApi;
 import org.hyperic.hq.hqapi1.MetricDataApi;
 import org.hyperic.hq.hqapi1.ResourceApi;
+import org.hyperic.hq.hqapi1.types.AlertActionConfig;
+import org.hyperic.hq.hqapi1.types.AlertCondition;
+import org.hyperic.hq.hqapi1.types.AlertDefinitionsResponse;
 import org.hyperic.hq.hqapi1.types.LastMetricData;
 import org.hyperic.hq.hqapi1.types.Metric;
 import org.hyperic.hq.hqapi1.types.MetricData;
@@ -22,13 +24,16 @@ import org.hyperic.hq.hqapi1.types.ResourceInfo;
 import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResponseStatus;
+import org.hyperic.hq.hqapi1.types.AlertDefinition;
+import org.hyperic.hq.hqapi1.types.User;
+import org.seforge.monitor.domain.Condition;
+import org.seforge.monitor.domain.Constraint;
 import org.seforge.monitor.domain.ResourceGroup;
 import org.seforge.monitor.domain.ResourcePropertyKey;
 import org.seforge.monitor.domain.ResourcePropertyValue;
 import org.seforge.monitor.exception.NotMonitoredException;
 import org.seforge.monitor.service.PrototypeMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,24 +42,20 @@ public class HQProxy {
 
 	private Log log = LogFactory.getLog(HQProxy.class);
 
+	@Autowired
 	private HQApi hqapi;
 
 	@Autowired
-	private PrototypeMapping mapping;
-
-	@Autowired
-	public HQProxy(@Value("${hq.host}") String host,
-			@Value("${hq.port}") int port,
-			@Value("${hq.secure}") boolean secure,
-			@Value("${hq.username}") String username,
-			@Value("${hq.password}") String password) {
-		this.hqapi = new HQApi(host, port, secure, username, password);
-		log.info("hqapi has fetched successfully.");
-	}
+	private PrototypeMapping mapping;	
 
 	public HQApi getHQApi() {
 		return this.hqapi;
 	}
+	
+	public AlertDefinitionApi getAlertDefinitionApi(){
+		return this.hqapi.getAlertDefinitionApi();
+	}
+		
 
 	public List<Resource> getWin32PlatformResources(boolean verbose,
 			boolean children) throws IOException {
@@ -210,19 +211,10 @@ public class HQProxy {
 	 * metricDataApi.getData(metrics).getLastMetricData(); }
 	 */
 
-	public Resource getHqResource(org.seforge.monitor.domain.Resource r){
-		ResourceApi resourceApi = hqapi.getResourceApi();
-		Resource resource;
-		try {
-			resource = resourceApi.getResource(
+	public Resource getHqResource(org.seforge.monitor.domain.Resource r) throws IOException{		
+			return hqapi.getResourceApi().getResource(
 					r.getResourceId(), false, false)
-					.getResource();
-			return resource;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}		
+					.getResource();	
 	}
 	
 	public LastMetricData getLastMetricData(org.seforge.monitor.domain.Resource r, org.seforge.monitor.domain.Metric m)
@@ -294,6 +286,29 @@ public class HQProxy {
 			return false;
 		}		
 	}
+	
+	public void syncAlert(List<org.seforge.monitor.domain.Resource> resources, Constraint constraint, String email) throws IOException{
+		List<AlertDefinition> definitions = new ArrayList<AlertDefinition>();
+		Condition c = constraint.getCondition();		
+		for(org.seforge.monitor.domain.Resource pResource : resources){
+			AlertDefinition alertDefinition = new AlertDefinition();
+			alertDefinition.setName(constraint.getName());
+			alertDefinition.setDescription(constraint.getDescription());
+			alertDefinition.setPriority(constraint.getPriority());
+			alertDefinition.setActive(constraint.isActive());
+			alertDefinition.setResource(getHqResource(pResource));		
+			alertDefinition.getAlertCondition().add(
+	                AlertDefinitionBuilder.createThresholdCondition(true, c.getThresholdMetric(), AlertDefinitionBuilder.AlertComparator.valueOf(c.getThresholdComparator()), c.getThresholdValue()));					
+			AlertDefinitionBuilder.addEmailAction(alertDefinition, new String[] {email});		
+			definitions.add(alertDefinition);
+		}
+		AlertDefinitionApi api = hqapi.getAlertDefinitionApi();
+		AlertDefinitionsResponse response = api.syncAlertDefinitions(definitions);
+	}	
+	
+	public void syncAlerts(List<Constraint> constraints){
+		
+	}	
 
 
 }

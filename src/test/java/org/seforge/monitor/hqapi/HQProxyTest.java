@@ -1,28 +1,28 @@
 package org.seforge.monitor.hqapi;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.hq.hqapi1.GroupApi;
-import org.hyperic.hq.hqapi1.MetricApi;
-import org.hyperic.hq.hqapi1.MetricDataApi;
-import org.hyperic.hq.hqapi1.ResourceEdgeApi;
-import org.hyperic.hq.hqapi1.types.Group;
-import org.hyperic.hq.hqapi1.types.GroupResponse;
-import org.hyperic.hq.hqapi1.types.GroupsResponse;
-import org.hyperic.hq.hqapi1.types.Metric;
-import org.hyperic.hq.hqapi1.types.MetricTemplate;
-import org.hyperic.hq.hqapi1.types.MetricTemplatesResponse;
-import org.hyperic.hq.hqapi1.types.MetricsResponse;
-import org.hyperic.hq.hqapi1.types.Resource;
-import org.hyperic.hq.hqapi1.types.ResourceInfo;
+import org.hyperic.hq.hqapi1.AlertDefinitionApi;
+import org.hyperic.hq.hqapi1.AlertDefinitionBuilder.AlertPriority;
+import org.hyperic.hq.hqapi1.HQApi;
+import org.hyperic.hq.hqapi1.types.AlertDefinition;
+import org.hyperic.hq.hqapi1.types.AlertDefinitionsResponse;
 import org.junit.Test;
+import org.seforge.monitor.domain.Condition;
+import org.seforge.monitor.domain.Constraint;
+import org.seforge.monitor.domain.Resource;
+import org.seforge.monitor.exception.NotMonitoredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 @ContextConfiguration(locations={"classpath:META-INF/spring/applicationContext.xml"})
 public class HQProxyTest extends AbstractTransactionalJUnit4SpringContextTests {
+	@Autowired
+	private HQApi hqapi;
+	
 	@Autowired
 	private HQProxy proxy;
 	
@@ -63,7 +63,7 @@ public class HQProxyTest extends AbstractTransactionalJUnit4SpringContextTests {
 //		proxy.saveResource(r, null, true);
 ////		System.out.println(org.seforge.monitor.domain.Resource.countResources());
 //	}
-	
+	/*
 	@Test
 	public void testResourceQuery() throws IOException{
 		
@@ -75,6 +75,43 @@ public class HQProxyTest extends AbstractTransactionalJUnit4SpringContextTests {
 		    List groups = groupResponse.getGroup();
 
 		    System.out.println(groups.size());
+		
+	}
+	*/
+	
+	@Test
+	public void testResourceQuery() throws IOException, NotMonitoredException{
+		/*
+		 AlertDefinitionApi defApi = hqapi.getAlertDefinitionApi();
+		 AlertDefinitionsResponse response =  defApi.getAlertDefinitions(proxy.getVimResource("192.168.4.165", false, false), true);
+		 List<AlertDefinition> alerts = response.getAlertDefinition();
+		 System.out.println(alerts.size());
+		 for(AlertDefinition alert : alerts){	
+			 System.out.println(alert.getName());
+			System.out.println( alert.getAlertAction().size());
+			//System.out.println(alert.getAlertAction().get(0).getClassName());
+			
+		 }
+		 */
+		 
+		
+		List<Resource> resources = new ArrayList<Resource>();
+		resources.add(Resource.findResource(149));
+		
+		Condition con = new Condition();
+		con.setThresholdMetric("Cpu Usage");
+		con.setThresholdComparator("GREATER_THAN");
+		con.setThresholdValue(0.0);
+		
+		Constraint c = new Constraint();
+		c.setName("remote alert");
+		c.setDescription("remote");
+		c.setCondition(con);	
+		c.setPriority(AlertPriority.LOW.getPriority());
+		c.setActive(true);
+		
+		proxy.syncAlert(resources, c, "shaojinvivian@gmail.com");
+		
 		
 	}
 	
