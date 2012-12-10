@@ -9,6 +9,7 @@ import org.seforge.monitor.domain.Constraint;
 import org.seforge.monitor.domain.Resource;
 import org.seforge.monitor.domain.ResourceGroup;
 import org.seforge.monitor.domain.ResourcePrototype;
+import org.seforge.monitor.exception.HQApiException;
 import org.seforge.monitor.hqapi.HQProxy;
 import org.seforge.monitor.manager.ConstraintManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,19 @@ public class ConstraintManagerImpl implements ConstraintManager{
 			if(r.getResourcePrototype().getName().equals(rp.getName()))				
 				gResources.add(r);
 		}		
-		int adId = hqProxy.syncAlert(gResources, constraint, rg.getGroupOwner().getEmail());		
+		int adId = hqProxy.syncAlert(gResources, constraint);		
 		constraint.setAlertDefinitionId(adId);
 		constraint.persist();
 	}
 	
-	public void deleteConstraint(Constraint constraint) throws IOException {
-		hqProxy.deleteAlert(constraint);		
+	public void deleteConstraint(Constraint constraint) throws IOException, HQApiException{
+		if(hqProxy.deleteAlert(constraint))
+		{
+			constraint.getCondition().remove();
+			constraint.remove();
+		}else{
+			throw new HQApiException();
+		}
 	}
 	
 }

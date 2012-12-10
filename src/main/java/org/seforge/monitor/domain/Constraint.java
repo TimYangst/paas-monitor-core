@@ -21,6 +21,7 @@ public class Constraint {
 	private String description;
 	private int priority;
 	private boolean active;
+	private String otherReceipts;
 	private int alertDefinitionId;
 	
 	@OneToOne

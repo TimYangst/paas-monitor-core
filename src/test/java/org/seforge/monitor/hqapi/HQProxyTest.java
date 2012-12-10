@@ -76,42 +76,7 @@ public class HQProxyTest extends AbstractTransactionalJUnit4SpringContextTests {
 	}
 	*/
 	
-	@Test
-	public void testResourceQuery() throws IOException, NotMonitoredException{
-		/*
-		 AlertDefinitionApi defApi = hqapi.getAlertDefinitionApi();
-		 AlertDefinitionsResponse response =  defApi.getAlertDefinitions(proxy.getVimResource("192.168.4.165", false, false), true);
-		 List<AlertDefinition> alerts = response.getAlertDefinition();
-		 System.out.println(alerts.size());
-		 for(AlertDefinition alert : alerts){	
-			 System.out.println(alert.getName());
-			System.out.println( alert.getAlertAction().size());
-			//System.out.println(alert.getAlertAction().get(0).getClassName());
-			
-		 }
-		 */
-		 
-		
-		List<Resource> resources = new ArrayList<Resource>();
-		resources.add(Resource.findResource(149));
-		
-		Condition con = new Condition();
-		con.setThresholdMetric("Cpu Usage");
-		con.setThresholdComparator("GREATER_THAN");
-		con.setThresholdValue(0.0);
-		
-		Constraint c = new Constraint();
-		c.setName("remote alert");
-		c.setDescription("remote");
-		c.setCondition(con);	
-		c.setPriority(AlertPriority.LOW.getPriority());
-		c.setActive(true);
-		
-		proxy.syncAlert(resources, c, "shaojinvivian@gmail.com");
-		
-		
-	}
-	
+
 
 	
 

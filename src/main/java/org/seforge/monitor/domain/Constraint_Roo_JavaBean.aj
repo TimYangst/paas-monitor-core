@@ -42,6 +42,14 @@ privileged aspect Constraint_Roo_JavaBean {
         this.active = active;
     }
     
+    public String Constraint.getOtherReceipts() {
+        return this.otherReceipts;
+    }
+    
+    public void Constraint.setOtherReceipts(String otherReceipts) {
+        this.otherReceipts = otherReceipts;
+    }
+    
     public int Constraint.getAlertDefinitionId() {
         return this.alertDefinitionId;
     }

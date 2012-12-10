@@ -25,6 +25,7 @@ import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResponseStatus;
 import org.hyperic.hq.hqapi1.types.AlertDefinition;
+import org.hyperic.hq.hqapi1.types.StatusResponse;
 import org.hyperic.hq.hqapi1.types.User;
 import org.seforge.monitor.domain.Condition;
 import org.seforge.monitor.domain.Constraint;
@@ -288,7 +289,7 @@ public class HQProxy {
 	}
 	
 	//Return the id of synced alertDefinition 
-	public int syncAlert(List<org.seforge.monitor.domain.Resource> resources, Constraint constraint, String email) throws IOException{
+	public int syncAlert(List<org.seforge.monitor.domain.Resource> resources, Constraint constraint) throws IOException{
 		List<AlertDefinition> definitions = new ArrayList<AlertDefinition>();
 		Condition c = constraint.getCondition();		
 		for(org.seforge.monitor.domain.Resource pResource : resources){
@@ -300,7 +301,7 @@ public class HQProxy {
 			alertDefinition.setResource(getHqResource(pResource));		
 			alertDefinition.getAlertCondition().add(
 	                AlertDefinitionBuilder.createThresholdCondition(true, c.getThresholdMetric(), AlertDefinitionBuilder.AlertComparator.valueOf(c.getThresholdComparator()), c.getThresholdValue()));					
-			AlertDefinitionBuilder.addEmailAction(alertDefinition, new String[] {email});		
+			AlertDefinitionBuilder.addEmailAction(alertDefinition, new String[] {constraint.getResourceGroup().getGroupOwner().getEmail(),constraint.getOtherReceipts()});		
 			definitions.add(alertDefinition);
 		}
 		AlertDefinitionApi api = hqapi.getAlertDefinitionApi();
@@ -308,10 +309,13 @@ public class HQProxy {
 		return response.getAlertDefinition().get(0).getId();
 	}	
 	
-	public void deleteAlert(Constraint constraint) throws IOException {
+	public boolean deleteAlert(Constraint constraint) throws IOException {
 		AlertDefinitionApi api = hqapi.getAlertDefinitionApi();
-		api.deleteAlertDefinition(constraint.getAlertDefinitionId());
-		constraint.remove();
+		StatusResponse response=api.deleteAlertDefinition(constraint.getAlertDefinitionId());
+		if(response.getStatus().equals(ResponseStatus.SUCCESS))
+			return true;
+		else 
+			return false;		
 	}
 
 
