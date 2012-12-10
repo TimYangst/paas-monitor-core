@@ -287,7 +287,8 @@ public class HQProxy {
 		}		
 	}
 	
-	public void syncAlert(List<org.seforge.monitor.domain.Resource> resources, Constraint constraint, String email) throws IOException{
+	//Return the id of synced alertDefinition 
+	public int syncAlert(List<org.seforge.monitor.domain.Resource> resources, Constraint constraint, String email) throws IOException{
 		List<AlertDefinition> definitions = new ArrayList<AlertDefinition>();
 		Condition c = constraint.getCondition();		
 		for(org.seforge.monitor.domain.Resource pResource : resources){
@@ -304,11 +305,14 @@ public class HQProxy {
 		}
 		AlertDefinitionApi api = hqapi.getAlertDefinitionApi();
 		AlertDefinitionsResponse response = api.syncAlertDefinitions(definitions);
+		return response.getAlertDefinition().get(0).getId();
 	}	
 	
-	public void syncAlerts(List<Constraint> constraints){
-		
-	}	
+	public void deleteAlert(Constraint constraint) throws IOException {
+		AlertDefinitionApi api = hqapi.getAlertDefinitionApi();
+		api.deleteAlertDefinition(constraint.getAlertDefinitionId());
+		constraint.remove();
+	}
 
 
 }

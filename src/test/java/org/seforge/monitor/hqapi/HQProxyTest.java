@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.hq.hqapi1.AlertDefinitionApi;
 import org.hyperic.hq.hqapi1.AlertDefinitionBuilder.AlertPriority;
 import org.hyperic.hq.hqapi1.HQApi;
-import org.hyperic.hq.hqapi1.types.AlertDefinition;
-import org.hyperic.hq.hqapi1.types.AlertDefinitionsResponse;
 import org.junit.Test;
 import org.seforge.monitor.domain.Condition;
 import org.seforge.monitor.domain.Constraint;

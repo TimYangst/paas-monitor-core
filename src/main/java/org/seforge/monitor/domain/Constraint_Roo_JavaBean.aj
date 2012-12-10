@@ -42,6 +42,14 @@ privileged aspect Constraint_Roo_JavaBean {
         this.active = active;
     }
     
+    public int Constraint.getAlertDefinitionId() {
+        return this.alertDefinitionId;
+    }
+    
+    public void Constraint.setAlertDefinitionId(int alertDefinitionId) {
+        this.alertDefinitionId = alertDefinitionId;
+    }
+    
     public Condition Constraint.getCondition() {
         return this.condition;
     }

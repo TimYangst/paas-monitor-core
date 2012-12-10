@@ -19,15 +19,24 @@ public class ConstraintManagerImpl implements ConstraintManager{
 	@Autowired
 	private HQProxy hqProxy;	
 	
-	public void addNewConstraint(ResourcePrototype rp, ResourceGroup rg, Constraint constraint) throws IOException{
-		//Find all the resources that of rp and in rg		
+	public void addNewConstraint(Constraint constraint) throws IOException{	
+		constraint.setActive(true);
+		//Find all the resources that of rp and in rg
+		ResourcePrototype rp = constraint.getResourcePrototype();
+		ResourceGroup rg = constraint.getResourceGroup();
 		Set<Resource> resources = rg.getResources();
 		List<Resource> gResources = new ArrayList<Resource>();
 		for(Resource r: resources){
 			if(r.getResourcePrototype().getName().equals(rp.getName()))				
 				gResources.add(r);
 		}		
-		hqProxy.syncAlert(gResources, constraint, rg.getGroupOwner().getEmail());
-	}	
+		int adId = hqProxy.syncAlert(gResources, constraint, rg.getGroupOwner().getEmail());		
+		constraint.setAlertDefinitionId(adId);
+		constraint.persist();
+	}
+	
+	public void deleteConstraint(Constraint constraint) throws IOException {
+		hqProxy.deleteAlert(constraint);		
+	}
 	
 }
