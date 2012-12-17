@@ -33,6 +33,7 @@ public class ConstraintManagerImpl implements ConstraintManager{
 		}		
 		int adId = hqProxy.syncAlert(gResources, constraint);		
 		constraint.setAlertDefinitionId(adId);
+		constraint.getCondition().persist();
 		constraint.persist();
 	}
 	

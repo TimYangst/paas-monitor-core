@@ -3,6 +3,7 @@
 
 package org.seforge.monitor.domain;
 
+import java.util.List;
 import java.util.Set;
 import org.seforge.monitor.domain.MetricTemplate;
 import org.seforge.monitor.domain.Resource;
@@ -51,11 +52,11 @@ privileged aspect ResourcePrototype_Roo_JavaBean {
         this.resources = resources;
     }
     
-    public Set<MetricTemplate> ResourcePrototype.getMetricTemplates() {
+    public List<MetricTemplate> ResourcePrototype.getMetricTemplates() {
         return this.metricTemplates;
     }
     
-    public void ResourcePrototype.setMetricTemplates(Set<MetricTemplate> metricTemplates) {
+    public void ResourcePrototype.setMetricTemplates(List<MetricTemplate> metricTemplates) {
         this.metricTemplates = metricTemplates;
     }
     

@@ -41,7 +41,7 @@ public class ResourcePrototype {
 	private Set<Resource> resources;	
 	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "resourcePrototype")
-	private Set<MetricTemplate> metricTemplates;	
+	private List<MetricTemplate> metricTemplates;	
 	
 	
 	public ResourcePrototype(String name, Integer typeId){

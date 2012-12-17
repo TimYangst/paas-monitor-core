@@ -142,12 +142,12 @@ public class AlertDefinitionBuilder {
      */
     public static AlertCondition createThresholdCondition(boolean required,
                                                           String metric,
-                                                          AlertComparator comparator,
+                                                          String comparator,
                                                           double threshold) {
         AlertCondition c = createBaseCondition(required);
         c.setType(AlertConditionType.THRESHOLD.getType());
         c.setThresholdMetric(metric);
-        c.setThresholdComparator(comparator.getComparator());
+        c.setThresholdComparator(comparator);
         c.setThresholdValue(threshold);
 
         return c;

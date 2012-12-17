@@ -106,21 +106,11 @@ public class HQProxy {
 			try {
 				templates = getMetricTemplatesByResourcePrototype(resource
 						.getResourcePrototype());
-				int metricSize = org.seforge.monitor.domain.Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, rpt).getResultList().size();
 				for (MetricTemplate template : templates) {
 					org.seforge.monitor.domain.MetricTemplate metricTemplate = new org.seforge.monitor.domain.MetricTemplate(
 							template);
 					metricTemplate.setResourcePrototype(rpt);
-					metricTemplate.persist();					
-					if(metricSize==0){						
-						org.seforge.monitor.domain.Metric metric = new org.seforge.monitor.domain.Metric();
-						metric.setResourceGroup(resourceGroup);
-						metric.setMetricTemplate(metricTemplate);						
-						metric.setResourcePrototype(rpt);
-						metric.setInterval(metricTemplate.getDefaultInterval());
-						metric.setEnabled(metricTemplate.isIndicator());
-						metric.persist();						
-					}					
+					metricTemplate.persist();								
 				}
 			} catch (IOException e) {
 				log.error("Cannot get metric templates of Resource Prototype "
@@ -300,7 +290,7 @@ public class HQProxy {
 			alertDefinition.setActive(constraint.isActive());
 			alertDefinition.setResource(getHqResource(pResource));		
 			alertDefinition.getAlertCondition().add(
-	                AlertDefinitionBuilder.createThresholdCondition(true, c.getThresholdMetric(), AlertDefinitionBuilder.AlertComparator.valueOf(c.getThresholdComparator()), c.getThresholdValue()));					
+	                AlertDefinitionBuilder.createThresholdCondition(true, c.getThresholdMetric(), c.getThresholdComparator(), c.getThresholdValue()));					
 			AlertDefinitionBuilder.addEmailAction(alertDefinition, new String[] {constraint.getResourceGroup().getGroupOwner().getEmail(),constraint.getOtherReceipts()});		
 			definitions.add(alertDefinition);
 		}
