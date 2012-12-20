@@ -109,9 +109,9 @@
 		<type>6</type>
 	</prototype>	
 	<prototype>
-		<name>Apache Tomcat 6.0 Global Request Processor</name>
+		<name>Apache Tomcat 7.0 Global Request Processor</name>
 		<type>6</type>
-	</prototype>
+	</prototype>	
 	<prototype>
 		<name>Apache Tomcat 7.0 JSP Monitor</name>
 		<type>6</type>

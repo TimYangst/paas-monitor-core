@@ -11,5 +11,7 @@ public interface ResourceManager {
 	
 	public List<Resource> getPhymsByGroup(int groupId);
 	
+	public List<Resource> getAppServersByGroup(int groupId);
+	
 	public void addNewServer(String jmxPort, String path, String serviceName);	
 }

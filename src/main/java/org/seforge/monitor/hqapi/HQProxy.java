@@ -90,8 +90,7 @@ public class HQProxy {
 
 	@Transactional
 	public org.seforge.monitor.domain.Resource saveResource(Resource resource,
-			org.seforge.monitor.domain.Resource parent, boolean cascade) {
-		ResourceGroup resourceGroup = ResourceGroup.findResourceGroup(2);
+			org.seforge.monitor.domain.Resource parent, boolean cascade) {		
 		// First, save the prototype of the resource if it does not exist
 		String ptName = resource.getResourcePrototype().getName();
 		Integer typeId = mapping.getTypeByPrototype(ptName);
@@ -102,20 +101,7 @@ public class HQProxy {
 					typeId);
 			rpt.persist();
 			// 同时保存prototype对应的metrictemplates
-			List<MetricTemplate> templates;
-			try {
-				templates = getMetricTemplatesByResourcePrototype(resource
-						.getResourcePrototype());
-				for (MetricTemplate template : templates) {
-					org.seforge.monitor.domain.MetricTemplate metricTemplate = new org.seforge.monitor.domain.MetricTemplate(
-							template);
-					metricTemplate.setResourcePrototype(rpt);
-					metricTemplate.persist();								
-				}
-			} catch (IOException e) {
-				log.error("Cannot get metric templates of Resource Prototype "
-						+ resource.getResourcePrototype().getName());
-			}
+			
 			
 		}
 
@@ -126,7 +112,6 @@ public class HQProxy {
 		r.setResourceId(resource.getId());
 		r.setInstanceId(resource.getInstanceId());
 		r.setResourcePrototype(rpt);		
-		r.addResourceGroup(resourceGroup);
 		if (parent != null) {
 			r.setParent(parent);
 		}
@@ -149,8 +134,6 @@ public class HQProxy {
 			value.setResourcePropertyKey(rpKey);
 			value.persist();
 		}	
-	
-		
 		if (cascade && !resource.getResource().isEmpty()) {
 			for (Resource child : resource.getResource()) {
 				saveResource(child, r, cascade);
@@ -158,6 +141,31 @@ public class HQProxy {
 		}
 		return r;
 	}
+	
+	
+	@Transactional
+	public void propogateMetricTemplatesForAll(){
+		List<org.seforge.monitor.domain.ResourcePrototype> prototypes = org.seforge.monitor.domain.ResourcePrototype.findAllResourcePrototypes();
+		for(org.seforge.monitor.domain.ResourcePrototype rp : prototypes){
+			if(rp.getId() !=1){
+				List<MetricTemplate> templates;
+				try {
+					templates = getMetricTemplatesByResourcePrototype(rp.getName());
+					for (MetricTemplate template : templates) {
+						org.seforge.monitor.domain.MetricTemplate metricTemplate = new org.seforge.monitor.domain.MetricTemplate(
+								template);
+						metricTemplate.setResourcePrototype(rp);
+						metricTemplate.persist();								
+					}
+				} catch (IOException e) {
+					log.error("Cannot get metric templates of Resource Prototype "
+							+ rp.getName());
+				}
+			}		
+		}		
+	}
+	
+
 
 	private List<MetricTemplate> getMetricTemplatesByResourcePrototype(
 			ResourcePrototype resourcePrototype) throws IOException {
@@ -166,7 +174,7 @@ public class HQProxy {
 				.getMetricTemplate();
 	}
 
-	public List<MetricTemplate> getMetricTemplatesByResourcePrototype(
+	private List<MetricTemplate> getMetricTemplatesByResourcePrototype(
 			String name) throws IOException {
 		ResourceApi api = hqapi.getResourceApi();
 		ResourcePrototype prototype = api.getResourcePrototype(name)

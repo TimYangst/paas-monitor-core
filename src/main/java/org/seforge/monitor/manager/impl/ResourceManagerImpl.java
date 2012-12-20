@@ -36,6 +36,20 @@ public class ResourceManagerImpl implements ResourceManager{
 		}
 		return result;
 	}
+	
+	@Transactional
+	public List<Resource> getAppServersByGroup(int groupId){
+		List<Resource> resources = Resource.findResourcesByTypeIdEquals(ResourceType.APPLICATION_SERVER).getResultList();
+		List<Resource> result = new ArrayList<Resource>();
+		for(Resource r : resources){
+			for(ResourceGroup rg : r.getResourceGroups()){
+				if(rg.getId() == groupId){
+					result.add(r);
+				}					
+			}			
+		}
+		return result;
+	}
 
 	@Override
 	@Transactional
