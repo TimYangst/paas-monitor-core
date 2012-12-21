@@ -51,6 +51,14 @@ privileged aspect Resource_Roo_JavaBean {
         this.name = name;
     }
     
+    public int Resource.getChildrenCount() {
+        return this.childrenCount;
+    }
+    
+    public void Resource.setChildrenCount(int childrenCount) {
+        this.childrenCount = childrenCount;
+    }
+    
     public ResourcePrototype Resource.getResourcePrototype() {
         return this.resourcePrototype;
     }

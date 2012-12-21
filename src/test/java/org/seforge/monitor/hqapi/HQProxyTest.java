@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.hyperic.hq.hqapi1.AlertDefinitionBuilder.AlertPriority;
 import org.hyperic.hq.hqapi1.HQApi;
+import org.hyperic.hq.hqapi1.types.Resource;
 import org.junit.Test;
 import org.seforge.monitor.domain.Condition;
 import org.seforge.monitor.domain.Constraint;
-import org.seforge.monitor.domain.Resource;
 import org.seforge.monitor.exception.NotMonitoredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,6 +22,15 @@ public class HQProxyTest extends AbstractTransactionalJUnit4SpringContextTests {
 	
 	@Autowired
 	private HQProxy proxy;
+	
+	
+	@Test
+	public void testSaveResource() throws IOException, NotMonitoredException{
+		Resource r = proxy.getVimResource("192.168.4.168", true, true);
+		proxy.saveResource(r, null, true);
+	}
+	
+	
 	
 //	@Test
 //	public void testMetriApi() throws IOException{

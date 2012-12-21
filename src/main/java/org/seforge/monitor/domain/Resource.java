@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.JoinColumn;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
@@ -38,6 +39,9 @@ public class Resource {
 	private Integer instanceId;	
 	
 	private String name;
+	
+	@Transient
+	private int childrenCount;
 
 	@ManyToOne
 	private ResourcePrototype resourcePrototype;
@@ -66,6 +70,32 @@ public class Resource {
 			)	
 	private Resource parent;
 	
+	public Resource(){
+		
+	}
+	
+	public Resource(String name, boolean virtual, Resource parent){
+		if(virtual){
+			this.name = name;
+			this.resourceId = -1;
+			this.typeId = -1;
+			this.instanceId = -1;
+			ResourcePrototype rpt;			
+			if(parent.getResourcePrototype().getId() == 12){
+				rpt = ResourcePrototype.findResourcePrototype(18);
+				this.resourcePrototype = rpt;
+			}
+				
+			if(parent.getResourcePrototype().getId() == 13)
+			{
+				rpt = ResourcePrototype.findResourcePrototype(19);
+				this.resourcePrototype = rpt;			
+			}
+			this.parent = parent;		
+		}		
+		
+	}
+	
 	public void addChild(Resource resource){
 		this.getChildren().add(resource);
 	}
@@ -85,4 +115,30 @@ public class Resource {
 	        else
 	        	return null;
 	}
+	
+	
+	public static Resource findResourceByNameAndParent(String name, Resource parent){
+		 if (name == null || parent ==null)  throw new IllegalArgumentException("The name and parent argument is required");
+	        EntityManager em = Resource.entityManager();
+	        TypedQuery<Resource> q = em.createQuery("SELECT r FROM Resource AS r WHERE r.name = :name AND r.parent = :parent", Resource.class);
+	        q.setParameter("name", name);
+	        q.setParameter("parent", parent);
+	        List<Resource> result = q.getResultList();
+	        if(!result.isEmpty())
+	        	return result.get(0);
+	        else
+	        	return null;
+	}
+	
+	
+	public static List findResourceByResourcePrototypeAndParent(ResourcePrototype rpt, Resource parent){
+		 if (rpt == null || parent ==null)  throw new IllegalArgumentException("The name and parent argument is required");
+	        EntityManager em = Resource.entityManager();
+	        TypedQuery<Resource> q = em.createQuery("SELECT r FROM Resource AS r WHERE r.resourcePrototype = :resourcePrototype AND r.parent = :parent", Resource.class);
+	        q.setParameter("resourcePrototype", rpt);
+	        q.setParameter("parent", parent);
+	        List<Resource> result = q.getResultList();
+	        return result;
+	}
+	
 }

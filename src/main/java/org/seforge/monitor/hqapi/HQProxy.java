@@ -2,8 +2,11 @@ package org.seforge.monitor.hqapi;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,6 +95,7 @@ public class HQProxy {
 	public org.seforge.monitor.domain.Resource saveResource(Resource resource,
 			org.seforge.monitor.domain.Resource parent, boolean cascade) {		
 		// First, save the prototype of the resource if it does not exist
+		
 		String ptName = resource.getResourcePrototype().getName();
 		Integer typeId = mapping.getTypeByPrototype(ptName);
 		org.seforge.monitor.domain.ResourcePrototype rpt = org.seforge.monitor.domain.ResourcePrototype
@@ -100,12 +104,9 @@ public class HQProxy {
 			rpt = new org.seforge.monitor.domain.ResourcePrototype(ptName,
 					typeId);
 			rpt.persist();
-			// 同时保存prototype对应的metrictemplates
-			
-			
 		}
-
-		// Third, save the resource
+		
+		
 		org.seforge.monitor.domain.Resource r = new org.seforge.monitor.domain.Resource();
 		r.setName(resource.getName());
 		r.setTypeId(rpt.getTypeId());
@@ -116,7 +117,7 @@ public class HQProxy {
 			r.setParent(parent);
 		}
 		r.persist();
-
+		
 		// Fourth, save the properties of the resource
 		List<ResourceProperty> rpList = resource.getResourceProperty();
 		for (ResourceProperty rp : rpList) {
@@ -134,20 +135,131 @@ public class HQProxy {
 			value.setResourcePropertyKey(rpKey);
 			value.persist();
 		}	
+		
+		if(rpt.getName().equals("Apache Tomcat 6.0") || rpt.getName().equals("Apache Tomcat 7.0")){		
+			Pattern servletPattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s(.*)\\s.*\\s.*\\s.*//localhost/((.*))\\sServlet Monitor$");
+			Pattern webModulePattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s//localhost/((.*))\\s.*\\s.*\\sWeb Module Stats$");
+			Pattern cachePattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s(.*)\\s/((.*))\\sCache$");
+			Pattern jspPattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s.*\\s.*\\s//localhost/((.*))\\sJSP Monitor$");
+			Pattern dbPattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s\"(.*)\"\\s.*\\s(.*)\\s/((.*))\\sDataSource Pool$");
+
+			for (Resource child : resource.getResource()) {				
+				org.seforge.monitor.domain.Resource childResource = new org.seforge.monitor.domain.Resource();
+				org.seforge.monitor.domain.ResourcePrototype childRpt = org.seforge.monitor.domain.ResourcePrototype
+						.findResourcePrototypeByName(child.getResourcePrototype().getName());				
+				childResource.setTypeId(childRpt.getTypeId());
+				childResource.setResourceId(child.getId());
+				childResource.setInstanceId(child.getInstanceId());
+				childResource.setResourcePrototype(childRpt);
+				
+				String name = child.getName();
+				if(name.contains("Servlet Monitor")){					
+					Matcher m = servletPattern.matcher(name);
+					if(m.matches()){
+						String appName = m.group(2);
+						if(appName.equals(""))
+							appName = "ROOT";
+						childResource.setName(m.group(1) + " Servlet");
+						org.seforge.monitor.domain.Resource appParent = org.seforge.monitor.domain.Resource.findResourceByNameAndParent(appName, r);
+						if(appParent==null){
+							appParent = new org.seforge.monitor.domain.Resource(appName, true, r);
+							appParent.persist();						
+						}
+						childResource.setParent(appParent);
+						childResource.persist();
+					}else{
+						System.out.println(name);
+					}
+					
+				}else if(name.contains("Web Module Stats")){					
+					Matcher m = webModulePattern.matcher(name);
+					if(m.matches()){
+						String appName = m.group(1);
+						if(appName.equals(""))
+							appName = "ROOT";
+						childResource.setName(appName + " Web Module Stats");
+						org.seforge.monitor.domain.Resource appParent = org.seforge.monitor.domain.Resource.findResourceByNameAndParent(appName, r);
+						if(appParent==null){
+							appParent = new org.seforge.monitor.domain.Resource(appName, true, r);
+							appParent.persist();						
+						}
+						childResource.setParent(appParent);
+						childResource.persist();
+					}else{
+						System.out.println(name);
+					}					
+				}else if(name.contains("Cache")){					
+					Matcher m = cachePattern.matcher(name);
+					if(m.matches()){
+						String appName = m.group(2);
+						if(appName.equals(""))
+							appName = "ROOT";
+						childResource.setName(appName + " Cache");
+						org.seforge.monitor.domain.Resource appParent = org.seforge.monitor.domain.Resource.findResourceByNameAndParent(appName, r);
+						if(appParent==null){
+							appParent = new org.seforge.monitor.domain.Resource(appName, true, r);
+							appParent.persist();						
+						}
+						childResource.setParent(appParent);
+						childResource.persist();
+					}else{
+						System.out.println(name);
+					}					
+				}else if(name.contains("JSP Monitor")){					
+					Matcher m = jspPattern.matcher(name);
+					if(m.matches()){
+						String appName = m.group(1);
+						if(appName.equals(""))
+							appName = "ROOT";
+						childResource.setName(appName + " JSP Monitor");
+						org.seforge.monitor.domain.Resource appParent = org.seforge.monitor.domain.Resource.findResourceByNameAndParent(appName, r);
+						if(appParent==null){
+							appParent = new org.seforge.monitor.domain.Resource(appName, true, r);
+							appParent.persist();						
+						}
+						childResource.setParent(appParent);
+						childResource.persist();
+					}else{
+						System.out.println(name);
+					}					
+				}else if(name.contains("DataSource Pool")){					
+					Matcher m = dbPattern.matcher(name);
+					if(m.matches()){
+						String appName = m.group(3);
+						if(appName.equals(""))
+							appName = "ROOT";
+						childResource.setName( m.group(1) + " " +  m.group(2));
+						org.seforge.monitor.domain.Resource appParent = org.seforge.monitor.domain.Resource.findResourceByNameAndParent(appName, r);
+						if(appParent==null){
+							appParent = new org.seforge.monitor.domain.Resource(appName, true, r);
+							appParent.persist();						
+						}
+						childResource.setParent(appParent);
+						childResource.persist();
+					}else{
+						System.out.println(name);
+					}					
+				}				
+				else{					
+					saveResource(child, r, cascade);
+				}			
+			}
+			return r;
+			
+		}
 		if (cascade && !resource.getResource().isEmpty()) {
 			for (Resource child : resource.getResource()) {
 				saveResource(child, r, cascade);
 			}
 		}
 		return r;
-	}
-	
+	}	
 	
 	@Transactional
 	public void propogateMetricTemplatesForAll(){
 		List<org.seforge.monitor.domain.ResourcePrototype> prototypes = org.seforge.monitor.domain.ResourcePrototype.findAllResourcePrototypes();
 		for(org.seforge.monitor.domain.ResourcePrototype rp : prototypes){
-			if(rp.getId() !=1){
+			if(rp.getId() !=1 && rp.getId() !=18 && rp.getId() !=19){
 				List<MetricTemplate> templates;
 				try {
 					templates = getMetricTemplatesByResourcePrototype(rp.getName());
