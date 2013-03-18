@@ -9,6 +9,14 @@ import org.seforge.monitor.domain.Resource;
 
 privileged aspect Resource_Roo_Finder {
     
+    public static TypedQuery<Resource> Resource.findResourcesByResourceIdEquals(Integer resourceId) {
+        if (resourceId == null) throw new IllegalArgumentException("The resourceId argument is required");
+        EntityManager em = Resource.entityManager();
+        TypedQuery<Resource> q = em.createQuery("SELECT o FROM Resource AS o WHERE o.resourceId = :resourceId", Resource.class);
+        q.setParameter("resourceId", resourceId);
+        return q;
+    }
+    
     public static TypedQuery<Resource> Resource.findResourcesByTypeIdEquals(Integer typeId) {
         if (typeId == null) throw new IllegalArgumentException("The typeId argument is required");
         EntityManager em = Resource.entityManager();

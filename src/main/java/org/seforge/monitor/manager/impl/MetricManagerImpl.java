@@ -21,7 +21,7 @@ public class MetricManagerImpl implements MetricManager{
 	private HQProxy hqProxy;
 
 	@Override
-	public void saveAndUpdateMetrics(List<Metric> metrics, ResourcePrototype resourcePrototype) {
+	public void saveAndUpdateMetrics(List<Metric> metrics) {
 		// TODO First, save these metrics to our database;
 		// Second, call hqproxy and update metric in hqserver
 		for(Metric metric : metrics){
@@ -32,20 +32,33 @@ public class MetricManagerImpl implements MetricManager{
 				pmetric.setInterval(metric.getInterval());
 				pmetric.merge();
 			}else{
-				metric.setEnabled(metric.isEnabled());
+				metric.setEnabled(metric.isEnabled());				
 				metric.setInterval(metric.getInterval());
 				metric.persist();
 			}
 						
 		}
-		hqProxy.syncMetrics(metrics, resourcePrototype);
+		hqProxy.syncMetrics(metrics);
 		
 	}
 
 	
 	public List<Metric> getMetricsByResourcePrototypeAndGroup(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup){
-		List<MetricTemplate> templates = resourcePrototype.getMetricTemplates();
-		List<Metric> enabledMetrics = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();
+		List<MetricTemplate> templates;
+		List<Metric> enabledMetrics;
+		if(resourcePrototype.getId() == 18 || resourcePrototype.getId() == 19){
+			templates = new ArrayList();
+			enabledMetrics = new ArrayList();
+			for( int i =20; i<=24; i++){
+				ResourcePrototype rpt = ResourcePrototype.findResourcePrototype(i);
+				templates.addAll(rpt.getMetricTemplates());
+				enabledMetrics.addAll(Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, rpt).getResultList());
+			}			
+		}else{
+			templates = resourcePrototype.getMetricTemplates();
+			enabledMetrics = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();
+		}		 
+		  
 		Map<String, Metric> metricMap = new HashMap<String, Metric>();
 		for(Metric m: enabledMetrics){
 			String name = m.getMetricTemplate().getName();
@@ -57,7 +70,7 @@ public class MetricManagerImpl implements MetricManager{
 				m.setMetricTemplate(t);
 				m.setEnabled(false);
 				m.setResourceGroup(resourceGroup);
-				m.setResourcePrototype(resourcePrototype);
+				m.setResourcePrototype(t.getResourcePrototype());
 				m.setInterval(t.getDefaultInterval());
 				enabledMetrics.add(m);
 			}
@@ -77,12 +90,7 @@ public class MetricManagerImpl implements MetricManager{
 	}
 	
 	public List<Metric> getEnabledMetrics(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit){
-		List<Metric> all = getMetricsByResourcePrototypeAndGroup(resourcePrototype, resourceGroup);
-		ArrayList<Metric> enabledList = new ArrayList<Metric>();
-		for(Metric m : all){
-			if(m.isEnabled())
-				enabledList.add(m);
-		}
+		List<Metric> enabledList = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();			
 		if(start+limit < enabledList.size())
 			return enabledList.subList(start, start+limit);
 		else
@@ -90,13 +98,8 @@ public class MetricManagerImpl implements MetricManager{
 	}
 	
 	public int getEnabledMetricCount(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup){
-		List<Metric> all = getMetricsByResourcePrototypeAndGroup(resourcePrototype, resourceGroup);
-		ArrayList<Metric> enabledList = new ArrayList<Metric>();
-		for(Metric m : all){
-			if(m.isEnabled())
-				enabledList.add(m);
-		}
-		return enabledList.size();
+		List<Metric> enabled = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();		
+		return enabled.size();
 	}
 
 

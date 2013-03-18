@@ -25,7 +25,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 
 @RooJavaBean
 @RooToString
-@RooJpaActiveRecord(finders = {"findResourcesByTypeIdEquals"})
+@RooJpaActiveRecord(finders = {"findResourcesByTypeIdEquals", "findResourcesByResourceIdEquals"})
 @RooJson
 public class Resource {
 	@Id
@@ -72,6 +72,15 @@ public class Resource {
 	
 	public Resource(){
 		
+	}
+	
+	public Resource(org.hyperic.hq.hqapi1.types.Resource r) {
+		ResourcePrototype rpt = ResourcePrototype.findResourcePrototypeByName(r.getResourcePrototype().getName());
+		this.name = r.getName();
+		this.typeId = rpt.getTypeId();
+		this.resourceId = r.getId();
+		this.instanceId = r.getInstanceId();
+		this.resourcePrototype = rpt;
 	}
 	
 	public Resource(String name, boolean virtual, Resource parent){

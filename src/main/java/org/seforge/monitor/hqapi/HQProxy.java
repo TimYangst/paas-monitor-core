@@ -363,12 +363,13 @@ public class HQProxy {
 		}
 	}
 
-	public boolean syncMetrics(List<org.seforge.monitor.domain.Metric> metrics, org.seforge.monitor.domain.ResourcePrototype resourcePrototype) {
+	public boolean syncMetrics(List<org.seforge.monitor.domain.Metric> metrics) {
 		ResourceApi resourceApi = hqapi.getResourceApi();
 		MetricApi metricApi = hqapi.getMetricApi();
 		List<Metric> toBeSynced = new ArrayList<Metric>();
 		try {
 			for (org.seforge.monitor.domain.Metric m : metrics) {
+				org.seforge.monitor.domain.ResourcePrototype resourcePrototype = m.getResourcePrototype();
 				ResourceGroup group = m.getResourceGroup();
 				for (org.seforge.monitor.domain.Resource resource : group
 						.getResources()) {
