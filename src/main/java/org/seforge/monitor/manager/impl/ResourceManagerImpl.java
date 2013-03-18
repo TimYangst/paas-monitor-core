@@ -3,13 +3,15 @@ package org.seforge.monitor.manager.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.hqapi1.ResourceApi;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
-import org.hyperic.hq.hqapi1.types.ResponseStatus;
 import org.hyperic.hq.hqapi1.types.ResourceResponse;
+import org.hyperic.hq.hqapi1.types.ResponseStatus;
 import org.seforge.monitor.common.ResourceType;
 import org.seforge.monitor.domain.Resource;
 import org.seforge.monitor.domain.ResourceGroup;
@@ -75,12 +77,16 @@ public class ResourceManagerImpl implements ResourceManager{
 		//先调用proxy.createServerResource把resource通过hqapi添加到hyperic server中，参见test中CreateTomcatServer.java中的内容
 		//如果成功，获取相关的hyperic端resource信
 		//根据得到的信息，在数据库中存入该resource
-		org.hyperic.hq.hqapi1.types.Resource vim = proxy.getVimResource(ip, false, false);
-		Resource vimHQ = Resource.findResourcesByResourceIdEquals(vim.getId()).getSingleResult();  
-		if (vimHQ == null){
-			Resource r = new Resource(vim);
-			r.persist();
-		}		
+		org.hyperic.hq.hqapi1.types.Resource vimHQ = proxy.getVimResource(ip, false, false);
+		List l = Resource.findResourcesByResourceIdEquals(vimHQ.getId()).getResultList();
+		Resource vim;
+		if (l.size() == 0){
+			vim = new Resource(vimHQ);
+			vim.persist();
+		}else{
+			vim = (Resource)l.get(0);
+		}
+		
 		ResourcePrototype resourcePrototype = proxy.getHQApi().getResourceApi().getResourcePrototype(prototype).getResourcePrototype();
 		Map<String,String> configs = new HashMap<String,String>();
 		configs.put("jmx.url", jmxUrl);		 
@@ -89,11 +95,11 @@ public class ResourceManagerImpl implements ResourceManager{
 		//configs.put("server.log_track.files", "logs\\catalina.out");
 		configs.put("service_name", serviceName);
 		String name = prototype + " " + ip + " " + serviceName;
-		ResourceResponse response = proxy.getHQApi().getResourceApi().createServer(resourcePrototype, vim, name, configs);
+		ResourceResponse response = proxy.getHQApi().getResourceApi().createServer(resourcePrototype, vimHQ, name, configs);
 		if (response.getStatus() == ResponseStatus.SUCCESS) {
 			org.hyperic.hq.hqapi1.types.Resource newServer = response.getResource();
-			proxy.saveResource(newServer, vimHQ, true);
-			return newServer.getId();
+			Resource resource = proxy.saveResource(newServer, vim, true);
+			return resource.getId();
 		}
 		else
 		{
@@ -107,9 +113,16 @@ public class ResourceManagerImpl implements ResourceManager{
 	@Override
 	@Transactional
 	public void deleteServer(String id) throws NumberFormatException, IOException {
-		ResourceApi ra = proxy.getHQApi().getResourceApi();
-		ra.deleteResource(Integer.parseInt(id));
 		Resource resource = Resource.findResource(Integer.parseInt(id));
+		ResourceApi ra = proxy.getHQApi().getResourceApi();
+		Set<Resource> children = resource.getChildren();
+		ra.deleteResource(resource.getResourceId());
+		Iterator it = children.iterator();
+		while (it.hasNext()) {
+			Resource r = (Resource)it.next();
+			ra.deleteResource(resource.getResourceId());
+			r.remove();
+		}
 		resource.remove();
 	}
 
