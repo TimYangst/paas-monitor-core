@@ -108,6 +108,7 @@ public class ResourceManagerImpl implements ResourceManager{
 			ResourceApi resourceApi = proxy.getHQApi().getResourceApi();
 			int size = 0;
 			org.hyperic.hq.hqapi1.types.Resource fullServer = null;
+			//hq端添加资源后，并不能马上把子资源也添加进去，需要等待添加好之后再保存相应的子资源到我们的数据库
 			while(size == 0){
 				try {
 					Thread.sleep(1000);
@@ -124,7 +125,7 @@ public class ResourceManagerImpl implements ResourceManager{
 			rg.getResources().addAll(children);			
 			rg.persist();
 			
-			return newServer.getId();
+			return resource.getId();
 		}
 		else
 		{
