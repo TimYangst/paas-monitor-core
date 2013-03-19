@@ -18,4 +18,5 @@ public interface ResourceManager {
 	public Integer addNewServer(String ip, String jmxUrl, String path, String serviceName, String groupId, String protoytpe) throws IOException, NotMonitoredException;
 
 	public void deleteServer(String id) throws NumberFormatException, IOException;	
+	
 }

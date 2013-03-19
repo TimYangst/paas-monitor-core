@@ -3,10 +3,11 @@ package org.seforge.monitor.hqapi;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.hq.hqapi1.types.Resource;
+
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResourceResponse;
 import org.junit.Test;
+import org.seforge.monitor.domain.Resource;
 import org.seforge.monitor.manager.ResourceManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -55,7 +56,9 @@ public class CreateTomcatServer extends AbstractTransactionalJUnit4SpringContext
 		System.out.println(response.getError().getReasonText());
 //		System.out.println(r.getId());
  * */
-		rm.addNewServer("192.168.4.242", "service:jmx:rmi:///jndi/rmi://localhost:25411/jmxrmi", "E:\\sasep\\jsp\\tomcat7_21411", "tomcat7_21411", "100", "Apache Tomcat 7.0");
+		Resource parent = Resource.findResource(2367);
+		Integer id = rm.addNewServer("192.168.4.242", "service:jmx:rmi:///jndi/rmi://localhost:25411/jmxrmi", "E:\\sasep\\jsp\\tomcat7_21411", "tomcat7_21411", "100", "Apache Tomcat 7.0");
+		
 	}
 
 }

@@ -81,6 +81,17 @@ public class HQProxy {
 					+ " is not monitored.");
 		return vim;
 	}
+	
+	public Resource getResourceWithChildrenByHQResourceId(Integer hri){
+		ResourceApi resourceApi = hqapi.getResourceApi();
+		try {
+			return resourceApi.getResource(hri, true, true).getResource();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	public Resource createServerResource(ResourcePrototype resourcePrototype,
 			Resource parent, String name, Map<String, String> configs)
@@ -137,11 +148,11 @@ public class HQProxy {
 		}	
 		
 		if(rpt.getName().equals("Apache Tomcat 6.0") || rpt.getName().equals("Apache Tomcat 7.0")){		
-			Pattern servletPattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s(.*)\\s.*\\s.*\\s.*//localhost/((.*))\\sServlet Monitor$");
-			Pattern webModulePattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s//localhost/((.*))\\s.*\\s.*\\sWeb Module Stats$");
-			Pattern cachePattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s(.*)\\s/((.*))\\sCache$");
-			Pattern jspPattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s.*\\s.*\\s//localhost/((.*))\\sJSP Monitor$");
-			Pattern dbPattern = Pattern.compile("^Apache Tomcat/[\\d\\.]+[\\s\\d]*\\s\"(.*)\"\\s.*\\s(.*)\\s/((.*))\\sDataSource Pool$");
+			Pattern servletPattern = Pattern.compile("^Apache Tomcat\\s[\\d\\.]+[\\s\\d]*\\s(.*)\\s.*\\s.*\\s.*//localhost/((.*))\\sServlet Monitor$");
+			Pattern webModulePattern = Pattern.compile("^Apache Tomcat\\s[\\d\\.]+[\\s\\d]*\\s//localhost/((.*))\\s.*\\s.*\\sWeb Module Stats$");
+			Pattern cachePattern = Pattern.compile("^Apache Tomcat\\s[\\d\\.]+[\\s\\d]*\\s(.*)\\s/((.*))\\sCache$");
+			Pattern jspPattern = Pattern.compile("^Apache Tomcat\\s[\\d\\.]+[\\s\\d]*\\s.*\\s.*\\s//localhost/((.*))\\sJSP Monitor$");
+			Pattern dbPattern = Pattern.compile("^Apache Tomcat\\s[\\d\\.]+[\\s\\d]*\\s\"(.*)\"\\s.*\\s(.*)\\s/((.*))\\sDataSource Pool$");
 
 			for (Resource child : resource.getResource()) {				
 				org.seforge.monitor.domain.Resource childResource = new org.seforge.monitor.domain.Resource();

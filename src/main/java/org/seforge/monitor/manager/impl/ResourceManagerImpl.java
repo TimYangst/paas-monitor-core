@@ -72,11 +72,13 @@ public class ResourceManagerImpl implements ResourceManager{
 
 	@Override
 	@Transactional
-	public Integer addNewServer(String ip, String jmxUrl, String path, String serviceName, String groupId, String prototype) throws IOException, NotMonitoredException {
+	public Integer addNewServer(String ip, String jmxPort, String path, String serviceName, String groupId, String prototype) throws IOException, NotMonitoredException {
 		// TODO 
 		//先调用proxy.createServerResource把resource通过hqapi添加到hyperic server中，参见test中CreateTomcatServer.java中的内容
 		//如果成功，获取相关的hyperic端resource信
 		//根据得到的信息，在数据库中存入该resource
+		String jmxUrl = "service:jmx:rmi:///jndi/rmi://localhost:"+ jmxPort + "/jmxrmi";
+		
 		org.hyperic.hq.hqapi1.types.Resource vimHQ = proxy.getVimResource(ip, false, false);
 		List l = Resource.findResourcesByResourceIdEquals(vimHQ.getId()).getResultList();
 		Resource vim;
@@ -85,21 +87,44 @@ public class ResourceManagerImpl implements ResourceManager{
 			vim.persist();
 		}else{
 			vim = (Resource)l.get(0);
+		}		
+		
+		ResourceGroup rg = ResourceGroup.findResourceGroup(Integer.parseInt(groupId));
+		if (rg == null) {
+			rg = new ResourceGroup();
+			rg.setId(Integer.parseInt(groupId));
 		}
 		
 		ResourcePrototype resourcePrototype = proxy.getHQApi().getResourceApi().getResourcePrototype(prototype).getResourcePrototype();
 		Map<String,String> configs = new HashMap<String,String>();
 		configs.put("jmx.url", jmxUrl);		 
-		configs.put("process.query", "State.Name.eq=java,Args.*.sw=-Dcatalina.base="+ path);
-		//configs.put("server.log_track.enable", "true");
-		//configs.put("server.log_track.files", "logs\\catalina.out");
+		configs.put("process.query", "Pid.Service.eq="+ serviceName);		
 		configs.put("service_name", serviceName);
-		String name = prototype + " " + ip + " " + serviceName;
+		String name = prototype + " " + jmxPort;
 		ResourceResponse response = proxy.getHQApi().getResourceApi().createServer(resourcePrototype, vimHQ, name, configs);
 		if (response.getStatus() == ResponseStatus.SUCCESS) {
 			org.hyperic.hq.hqapi1.types.Resource newServer = response.getResource();
-			Resource resource = proxy.saveResource(newServer, vim, true);
-			return resource.getId();
+			
+			ResourceApi resourceApi = proxy.getHQApi().getResourceApi();
+			int size = 0;
+			org.hyperic.hq.hqapi1.types.Resource fullServer = null;
+			while(size == 0){
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fullServer = resourceApi.getResource(newServer.getId(), true, true).getResource();
+				size = fullServer.getResource().size();
+			}			
+			Resource resource = proxy.saveResource(fullServer, vim, true);
+			Set<Resource> children = resource.getChildren();			
+			rg.getResources().add(resource);
+			rg.getResources().addAll(children);			
+			rg.persist();
+			
+			return newServer.getId();
 		}
 		else
 		{
@@ -109,6 +134,8 @@ public class ResourceManagerImpl implements ResourceManager{
 		}
 			
 	}
+	
+
 
 	@Override
 	@Transactional
@@ -117,7 +144,7 @@ public class ResourceManagerImpl implements ResourceManager{
 		ResourceApi ra = proxy.getHQApi().getResourceApi();
 		Set<Resource> children = resource.getChildren();
 		ra.deleteResource(resource.getResourceId());
-		Iterator it = children.iterator();
+		Iterator<Resource> it = children.iterator();
 		while (it.hasNext()) {
 			Resource r = (Resource)it.next();
 			ra.deleteResource(resource.getResourceId());
