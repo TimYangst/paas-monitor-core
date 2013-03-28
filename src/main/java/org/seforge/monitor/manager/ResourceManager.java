@@ -16,6 +16,10 @@ public interface ResourceManager {
 	public List<Resource> getAppServersByGroup(int groupId);
 	
 	public Integer addNewServer(String ip, String jmxUrl, String path, String serviceName, String groupId, String protoytpe) throws IOException, NotMonitoredException;
+	
+	public Integer addApache(String ip, String port, String path, String serviceName, String groupId, String prototype) throws IOException, NotMonitoredException;
+	
+	public void addApacheApp(String id, String dir, String appType);
 
 	public void deleteServer(String id) throws NumberFormatException, IOException;	
 	
