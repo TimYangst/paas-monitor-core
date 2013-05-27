@@ -18,7 +18,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 
 @RooJavaBean
 @RooToString
-@RooJpaActiveRecord
+@RooJpaActiveRecord(finders = {"findGroupOwnersByNameEquals"})
 @RooJson
 public class GroupOwner {
 	@Id

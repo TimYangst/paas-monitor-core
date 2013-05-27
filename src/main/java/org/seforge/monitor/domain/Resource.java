@@ -148,6 +148,6 @@ public class Resource {
 	        q.setParameter("parent", parent);
 	        List<Resource> result = q.getResultList();
 	        return result;
-	}
+	}	
 	
 }

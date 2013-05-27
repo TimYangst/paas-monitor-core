@@ -20,6 +20,9 @@ public interface ResourceManager {
 	public Integer addApache(String ip, String port, String path, String serviceName, String groupId, String prototype) throws IOException, NotMonitoredException;
 	
 	public void addApacheApp(String id, String dir, String appType);
+	
+	public Integer addIis(String ip, String groupId) throws IOException, NotMonitoredException;
+
 
 	public void deleteServer(String id) throws NumberFormatException, IOException;	
 	

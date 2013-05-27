@@ -3,6 +3,7 @@ package org.seforge.monitor.manager.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -78,16 +79,8 @@ public class ResourceManagerImpl implements ResourceManager{
 		//如果成功，获取相关的hyperic端resource信
 		//根据得到的信息，在数据库中存入该resource
 		String jmxUrl = "service:jmx:rmi:///jndi/rmi://localhost:"+ jmxPort + "/jmxrmi";
-		
 		org.hyperic.hq.hqapi1.types.Resource vimHQ = proxy.getVimResource(ip, false, false);
-		List l = Resource.findResourcesByResourceIdEquals(vimHQ.getId()).getResultList();
-		Resource vim;
-		if (l.size() == 0){
-			vim = new Resource(vimHQ);
-			vim.persist();
-		}else{
-			vim = (Resource)l.get(0);
-		}		
+		Resource vim = findVim(vimHQ);
 		
 		ResourceGroup rg = ResourceGroup.findResourceGroup(Integer.parseInt(groupId));
 		if (rg == null) {
@@ -100,7 +93,7 @@ public class ResourceManagerImpl implements ResourceManager{
 		configs.put("jmx.url", jmxUrl);		 
 		configs.put("process.query", "Pid.Service.eq="+ serviceName);		
 		configs.put("service_name", serviceName);
-		String name = prototype + " " + jmxPort;
+		String name = prototype + " @ " + ip + ":" + jmxPort;
 		ResourceResponse response = proxy.getHQApi().getResourceApi().createServer(resourcePrototype, vimHQ, name, configs);
 		if (response.getStatus() == ResponseStatus.SUCCESS) {
 			org.hyperic.hq.hqapi1.types.Resource newServer = response.getResource();
@@ -120,11 +113,14 @@ public class ResourceManagerImpl implements ResourceManager{
 				size = fullServer.getResource().size();
 			}			
 			Resource resource = proxy.saveResource(fullServer, vim, true);
-			Set<Resource> children = resource.getChildren();			
+			Set<Resource> children = resource.getChildren();	
+			for(Resource child: children){
+				child.setResourceGroups(resource.getResourceGroups());
+				child.persist();
+			}
 			rg.getResources().add(resource);
 			rg.getResources().addAll(children);			
-			rg.persist();
-			
+			rg.persist();			
 			return resource.getId();
 		}
 		else
@@ -145,23 +141,14 @@ public class ResourceManagerImpl implements ResourceManager{
 		// server中，参见test中CreateTomcatServer.java中的内容
 		// 如果成功，获取相关的hyperic端resource信
 		// 根据得到的信息，在数据库中存入该resource
-		org.hyperic.hq.hqapi1.types.Resource vimHQ = proxy.getVimResource(ip,
-				false, false);
-		List l = Resource.findResourcesByResourceIdEquals(vimHQ.getId())
-				.getResultList();
-		Resource vim;
-		if (l.size() == 0) {
-			vim = new Resource(vimHQ);
-			vim.persist();
-		} else {
-			vim = (Resource) l.get(0);
-		}
+		org.hyperic.hq.hqapi1.types.Resource vimHQ = proxy.getVimResource(ip, false, false);
+		Resource vim = findVim(vimHQ);
 
 		ResourceGroup rg = ResourceGroup.findResourceGroup(Integer
 				.parseInt(groupId));
 		if (rg == null) {
 			rg = new ResourceGroup();
-			rg.setId(Integer.parseInt(groupId));
+			rg.setId(Integer.parseInt(groupId));			
 		}
 
 		ResourcePrototype resourcePrototype = proxy.getHQApi().getResourceApi()
@@ -196,6 +183,8 @@ public class ResourceManagerImpl implements ResourceManager{
 			*/
 			Resource resource = proxy.saveResource(newServer, vim, true);
 			// Set<Resource> children = resource.getChildren();
+			if(rg.getResources()==null)
+				rg.setResources(new HashSet<Resource>());			
 			rg.getResources().add(resource);
 			// rg.getResources().addAll(children);
 			rg.persist();
@@ -226,6 +215,63 @@ public class ResourceManagerImpl implements ResourceManager{
 		r.persist();
 	}
 	
+	public Integer addIis(String ip, String groupId) throws IOException, NotMonitoredException{
+		String prototype = "IIS 7.0";
+		String serviceName = "W3SVC";
+		
+		org.hyperic.hq.hqapi1.types.Resource vimHQ = proxy.getVimResource(ip, false, false);
+		Resource vim = findVim(vimHQ);
+		
+		ResourceGroup rg = ResourceGroup.findResourceGroup(Integer.parseInt(groupId));
+		if (rg == null) {
+			rg = new ResourceGroup();
+			rg.setId(Integer.parseInt(groupId));
+		}
+		
+		ResourcePrototype resourcePrototype = proxy.getHQApi().getResourceApi().getResourcePrototype(prototype).getResourcePrototype();
+		Map<String,String> configs = new HashMap<String,String>();			
+		configs.put("service_name", serviceName);
+		String name = prototype + " @ " + ip;
+		ResourceResponse response = proxy.getHQApi().getResourceApi().createServer(resourcePrototype, vimHQ, name, configs);
+		if (response.getStatus() == ResponseStatus.SUCCESS) {
+			org.hyperic.hq.hqapi1.types.Resource newServer = response.getResource();
+			
+			ResourceApi resourceApi = proxy.getHQApi().getResourceApi();
+			int size = 0;
+			org.hyperic.hq.hqapi1.types.Resource fullServer = null;
+			//hq端添加资源后，并不能马上把子资源也添加进去，需要等待添加好之后再保存相应的子资源到我们的数据库
+			while(size == 0){
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fullServer = resourceApi.getResource(newServer.getId(), true, true).getResource();
+				size = fullServer.getResource().size();
+			}			
+			Resource resource = proxy.saveResource(fullServer, vim, true);
+			Set<Resource> children = resource.getChildren();	
+			for(Resource child: children){
+				child.setResourceGroups(resource.getResourceGroups());
+				child.persist();
+			}
+			rg.getResources().add(resource);
+			rg.getResources().addAll(children);			
+			rg.persist();			
+			return resource.getId();
+		}
+		else
+		{
+			System.out.println(response.getStatus().name());
+			System.out.println(response.getError().getReasonText());
+			return new Integer(-1);
+		}
+		
+	}
+
+	
+	
 	@Override
 	@Transactional
 	public void deleteServer(String id) throws NumberFormatException, IOException {
@@ -240,6 +286,19 @@ public class ResourceManagerImpl implements ResourceManager{
 			r.remove();
 		}
 		resource.remove();
+	}
+	
+	@Transactional
+	private Resource findVim(org.hyperic.hq.hqapi1.types.Resource vimHQ){
+		List<Resource> l = Resource.findResourcesByResourceIdEquals(vimHQ.getId()).getResultList();
+		Resource vim;
+		if (l.size() == 0){
+			vim = new Resource(vimHQ);
+			vim.persist();
+		}else{
+			vim = (Resource)l.get(0);
+		}		
+		return vim;
 	}
 
 }

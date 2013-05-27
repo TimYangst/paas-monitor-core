@@ -28,9 +28,12 @@ public class MetricManagerImpl implements MetricManager{
 			Integer id = metric.getId();			
 			if(id!=null){
 				Metric pmetric = Metric.findMetric(id);
-				pmetric.setEnabled(metric.isEnabled());
-				pmetric.setInterval(metric.getInterval());
-				pmetric.merge();
+				if(!metric.isEnabled())
+					pmetric.remove();
+				else{
+					pmetric.setInterval(metric.getInterval());
+					pmetric.merge();
+				}				
 			}else{
 				metric.setEnabled(metric.isEnabled());				
 				metric.setInterval(metric.getInterval());
@@ -46,7 +49,7 @@ public class MetricManagerImpl implements MetricManager{
 	public List<Metric> getMetricsByResourcePrototypeAndGroup(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup){
 		List<MetricTemplate> templates;
 		List<Metric> enabledMetrics;
-		if(resourcePrototype.getId() == 18 || resourcePrototype.getId() == 19){
+		if(resourcePrototype.getId() == 18){
 			templates = new ArrayList();
 			enabledMetrics = new ArrayList();
 			for( int i =20; i<=24; i++){
@@ -54,7 +57,16 @@ public class MetricManagerImpl implements MetricManager{
 				templates.addAll(rpt.getMetricTemplates());
 				enabledMetrics.addAll(Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, rpt).getResultList());
 			}			
-		}else{
+		}if(resourcePrototype.getId() == 19){
+			templates = new ArrayList();
+			enabledMetrics = new ArrayList();
+			for( int i =25; i<=27; i++){
+				ResourcePrototype rpt = ResourcePrototype.findResourcePrototype(i);
+				templates.addAll(rpt.getMetricTemplates());
+				enabledMetrics.addAll(Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, rpt).getResultList());
+			}			
+		}
+		else{
 			templates = resourcePrototype.getMetricTemplates();
 			enabledMetrics = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();
 		}		 
@@ -90,6 +102,9 @@ public class MetricManagerImpl implements MetricManager{
 	}
 	
 	public List<Metric> getEnabledMetrics(ResourcePrototype resourcePrototype, ResourceGroup resourceGroup, int start, int limit){
+		System.out.println(resourcePrototype.getName());
+		System.out.println(resourcePrototype.getId());
+		System.out.println(resourceGroup.getGroupOwner().getName());
 		List<Metric> enabledList = Metric.findMetricsByResourceGroupAndResourcePrototype(resourceGroup, resourcePrototype).getResultList();			
 		if(start+limit < enabledList.size())
 			return enabledList.subList(start, start+limit);
